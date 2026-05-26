@@ -895,46 +895,50 @@ function renderEditor(){
   ${c.imgSrc?'':`<div class="img-zone"><input type="file" id="fImg" accept="image/*"/>
     <div class="img-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="1" y="4" width="22" height="16" rx="2.5" stroke="white" stroke-width="1.2"/><circle cx="7.5" cy="10" r="2" stroke="white" stroke-width="1.2"/><path d="M1 17l5-4.5 4 4 3.5-2.5 5 5" stroke="white" stroke-width="1.2" stroke-linejoin="round"/></svg>
     <p>클릭하여 이미지 업로드</p><span>PNG · JPG · WEBP</span></div></div>
-  <button class="img-btn" style="width:100%;margin-top:6px;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px" onclick="if(window.parent&&window.parent!==window)window.parent.postMessage({type:'openChannelPicker',cardIdx:ai},'*')">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-    공식 채널에서 선택
-  </button>`}
+  <div style="display:flex;gap:6px;margin-top:6px">
+    <button class="img-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="if(window.parent&&window.parent!==window)window.parent.postMessage({type:'openChannelPicker',cardIdx:ai},'*')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      채널 이미지
+    </button>
+    <button id="aiToggleBtn" class="img-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="toggleAiPanel()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L7.2 4.8L11 6L7.2 7.2L6 11L4.8 7.2L1 6L4.8 4.8L6 1Z" fill="currentColor"/></svg>
+      AI 이미지
+    </button>
+  </div>`}
 
   <div id="cropArea"></div>
   ${c.imgSrc?`<div class="img-actions">
     <div class="img-btn" style="text-align:center"><input type="file" id="fImg" accept="image/*"/>이미지 교체</div>
     <button class="img-btn" onclick="if(window.parent&&window.parent!==window)window.parent.postMessage({type:'openChannelPicker',cardIdx:ai},'*')">채널 이미지</button>
+    <button id="aiToggleBtn" class="img-btn" onclick="toggleAiPanel()">✨ AI 이미지</button>
     <button class="img-btn danger" id="imgDel">삭제</button>
   </div>`:''}
 
-  <div class="ai-gen-box" style="margin-top:8px">
-    <div class="ai-gen-header">
-      <svg class="ai-gen-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C8 1.5 6 4 6 6C6 7.1 6.9 8 8 8C9.1 8 10 7.1 10 6C10 4 8 1.5 8 1.5Z" fill="currentColor" opacity=".7"/><circle cx="4" cy="10" r="1.5" fill="currentColor" opacity=".5"/><circle cx="12" cy="10" r="1.5" fill="currentColor" opacity=".5"/><path d="M4 10C4 10 5.5 14.5 8 14.5C10.5 14.5 12 10 12 10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span class="ai-gen-title">AI 이미지 생성</span>
-      <span style="font-size:8px;color:var(--tt)">Gemini · Nano Banana 2</span>
-    </div>
-    <div class="ai-gen-body">
-      <div style="margin-bottom:8px">
-        <label style="font-size:9px;font-weight:600;color:var(--ts);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Gemini API 키</label>
-        <input id="geminiApiKey" type="password" placeholder="AIza..." style="width:100%;background:var(--bg-input);border:1px solid var(--stroke);border-radius:5px;color:var(--tp);font-family:var(--font);font-size:11px;padding:6px 10px;outline:none;transition:border-color .13s" onfocus="this.style.borderColor='rgba(167,139,250,0.5)'" onblur="this.style.borderColor='var(--stroke)'"/>
-        <div style="font-size:8px;color:var(--tt);margin-top:3px">키는 이 브라우저에만 저장됩니다</div>
+  <div id="aiGenPanel" style="display:none;flex-direction:column;margin-top:8px">
+    <div class="ai-gen-box">
+      <div class="ai-gen-header">
+        <svg class="ai-gen-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C8 1.5 6 4 6 6C6 7.1 6.9 8 8 8C9.1 8 10 7.1 10 6C10 4 8 1.5 8 1.5Z" fill="currentColor" opacity=".7"/><circle cx="4" cy="10" r="1.5" fill="currentColor" opacity=".5"/><circle cx="12" cy="10" r="1.5" fill="currentColor" opacity=".5"/><path d="M4 10C4 10 5.5 14.5 8 14.5C10.5 14.5 12 10 12 10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="ai-gen-title">AI 이미지 생성</span>
+        <span style="font-size:8px;color:var(--tt)">Gemini</span>
       </div>
-      <textarea class="ai-prompt" id="aiPrompt" placeholder="이미지 설명을 입력하세요&#10;예: 무대 위의 케이팝 그룹, 네온 조명"></textarea>
-      <div class="ai-style-row" id="aiStyleRow">
-        <button class="ai-style-btn on" data-s="">스타일 없음</button>
-        <button class="ai-style-btn" data-s="photorealistic, high quality photo">사실적</button>
-        <button class="ai-style-btn" data-s="cinematic lighting, dramatic, editorial">시네마틱</button>
-        <button class="ai-style-btn" data-s="kpop idol, colorful, vibrant, glossy">K-POP</button>
-        <button class="ai-style-btn" data-s="neon lights, cyberpunk, dark aesthetic">네온 사이버</button>
-        <button class="ai-style-btn" data-s="minimalist, clean, pastel colors">미니멀</button>
-        <button class="ai-style-btn" data-s="digital illustration, anime style">일러스트</button>
-        <button class="ai-style-btn" data-s="concert stage, crowd, spotlight, epic">콘서트</button>
+      <div class="ai-gen-body">
+        <textarea class="ai-prompt" id="aiPrompt" placeholder="이미지 설명을 입력하세요&#10;예: 무대 위의 케이팝 그룹, 네온 조명"></textarea>
+        <div class="ai-style-row" id="aiStyleRow">
+          <button class="ai-style-btn on" data-s="">스타일 없음</button>
+          <button class="ai-style-btn" data-s="photorealistic, high quality photo">사실적</button>
+          <button class="ai-style-btn" data-s="cinematic lighting, dramatic, editorial">시네마틱</button>
+          <button class="ai-style-btn" data-s="kpop idol, colorful, vibrant, glossy">K-POP</button>
+          <button class="ai-style-btn" data-s="neon lights, cyberpunk, dark aesthetic">네온 사이버</button>
+          <button class="ai-style-btn" data-s="minimalist, clean, pastel colors">미니멀</button>
+          <button class="ai-style-btn" data-s="digital illustration, anime style">일러스트</button>
+          <button class="ai-style-btn" data-s="concert stage, crowd, spotlight, epic">콘서트</button>
+        </div>
+        <button class="ai-gen-btn" id="aiGenBtn">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L7.2 4.8L11 6L7.2 7.2L6 11L4.8 7.2L1 6L4.8 4.8L6 1Z" fill="white"/></svg>
+          이미지 생성
+        </button>
+        <div id="aiResultArea"></div>
       </div>
-      <button class="ai-gen-btn" id="aiGenBtn">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L7.2 4.8L11 6L7.2 7.2L6 11L4.8 7.2L1 6L4.8 4.8L6 1Z" fill="white"/></svg>
-        이미지 생성
-      </button>
-      <div id="aiResultArea"></div>
     </div>
   </div>
 
@@ -1314,12 +1318,6 @@ ${c.imgSrc?`
     const promptRaw=document.getElementById('aiPrompt').value.trim();
     if(!promptRaw)return;
 
-    const apiKey=(document.getElementById('geminiApiKey').value||'').trim();
-    if(!apiKey){
-      document.getElementById('aiResultArea').innerHTML=`<div style="padding:10px;font-size:10px;color:rgba(255,180,80,0.9);text-align:center">⚠️ Gemini API 키를 먼저 입력해주세요</div>`;
-      return;
-    }
-
     const resultArea=document.getElementById('aiResultArea');
     const genBtn=document.getElementById('aiGenBtn');
     genBtn.disabled=true;
@@ -1332,21 +1330,15 @@ ${c.imgSrc?`
     const finalPrompt=`${promptRaw}${styleSuffix}, high quality, detailed, professional, ${arHint} composition`;
 
     try{
-      const resp=await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${apiKey}`,
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            contents:[{parts:[{text:finalPrompt}]}],
-            generationConfig:{responseModalities:['IMAGE','TEXT']}
-          })
-        }
-      );
+      const resp=await fetch('/api/ai-image',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt:finalPrompt})
+      });
 
       if(!resp.ok){
         const err=await resp.json().catch(()=>({}));
-        throw new Error(err?.error?.message||`HTTP ${resp.status}`);
+        throw new Error(err?.error||`HTTP ${resp.status}`);
       }
 
       const data=await resp.json();
@@ -2132,6 +2124,18 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
 
 // ── 에디터 섹션 더보기 상태 ──
 let _slExp=false, _olExp=false, _fontExp=false, _palExp=false, _colorExp=false;
+function toggleAiPanel(){
+  const panel=document.getElementById('aiGenPanel');
+  if(!panel)return;
+  const open=panel.style.display==='flex';
+  panel.style.display=open?'none':'flex';
+  const btn=document.getElementById('aiToggleBtn');
+  if(btn){
+    btn.style.borderColor=open?'':'rgba(167,139,250,0.5)';
+    btn.style.color=open?'':'rgba(167,139,250,1)';
+    btn.style.background=open?'':'rgba(167,139,250,0.1)';
+  }
+}
 function toggleExp(key){
   if(key==='sl')_slExp=!_slExp;
   else if(key==='ol')_olExp=!_olExp;
@@ -2158,12 +2162,7 @@ requestAnimationFrame(()=>{
   updatePanelDims();
   addCard();
   if(window.innerWidth<=640) mobSwitch('pm');
-  const savedKey=localStorage.getItem('gemini_api_key');
-  if(savedKey){const el=document.getElementById('geminiApiKey');if(el)el.value=savedKey;}
-  document.addEventListener('input',e=>{
-    if(e.target&&e.target.id==='geminiApiKey')
-      localStorage.setItem('gemini_api_key',e.target.value);
-  });
+  // geminiApiKey localStorage logic removed — key handled server-side via .env.local
 });
 
 // ── 한국어 번역 패널 ──
