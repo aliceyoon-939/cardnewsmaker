@@ -508,23 +508,23 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 const FONTS=[
   {id:'pretendard',   l:'Pretendard',     vi:false, stack:"'Pretendard Variable','Pretendard',-apple-system,sans-serif", prev:'K-POP NOW'},
   {id:'noto',         l:'Noto Sans KR',   vi:true,  stack:"'Noto Sans KR',sans-serif",                                   prev:'K-POP NOW'},
+  {id:'be-vietnam',   l:'Be Vietnam Pro', vi:true,  stack:"'Be Vietnam Pro',sans-serif",                                  prev:'K-POP NOW'},
   {id:'gothic-a1',    l:'Gothic A1',      vi:false, stack:"'Gothic A1',sans-serif",                                      prev:'K-POP NOW'},
   {id:'black-han',    l:'Black Han Sans', vi:false, stack:"'Black Han Sans',sans-serif",                                  prev:'케이팝 NOW'},
   {id:'nanum-myeong', l:'나눔명조',       vi:false, stack:"'Nanum Myeongjo',serif",                                       prev:'K-POP NOW'},
   {id:'space-grotesk',l:'Space Grotesk',  vi:true,  stack:"'Space Grotesk',sans-serif",                                   prev:'K-POP NOW'},
   {id:'montserrat',   l:'Montserrat',     vi:true,  stack:"'Montserrat',sans-serif",                                      prev:'K-POP NOW'},
-  {id:'be-vietnam',   l:'Be Vietnam Pro', vi:true,  stack:"'Be Vietnam Pro',sans-serif",                                  prev:'K-POP NOW'},
 ];
 const PAL=[
   {id:'flame', l:'플레임',c1:'#FF3476',c2:'#FF8C00',bg:'#11040C',cn:'rgba(190,242,100,.18)',ct:'#FF5599'},
-  {id:'aurora',l:'오로라', c1:'#00C9A7',c2:'#845EC2',bg:'#030D10',cn:'rgba(0,201,167,.16)', ct:'#00D4B0'},
   {id:'ice',   l:'아이스', c1:'#60B8FF',c2:'#A78BFA',bg:'#060C18',cn:'rgba(96,184,255,.15)',ct:'#7DC9FF'},
+  {id:'bw',    l:'B&W',    c1:'#FFFFFF',c2:'#AAAAAA',bg:'#0A0A0A',cn:'rgba(255,255,255,.15)',ct:'#FFFFFF'},
+  {id:'aurora',l:'오로라', c1:'#00C9A7',c2:'#845EC2',bg:'#030D10',cn:'rgba(0,201,167,.16)', ct:'#00D4B0'},
   {id:'gold',  l:'골드',   c1:'#F0A500',c2:'#FF6B6B',bg:'#0C0900',cn:'rgba(240,165,0,.17)', ct:'#F5B833'},
   {id:'neo',   l:'네온',   c1:'#FF2FA8',c2:'#2FFFD8',bg:'#06020D',cn:'rgba(255,47,168,.16)',ct:'#FF55BB'},
-  {id:'bw',    l:'B&W',    c1:'#FFFFFF',c2:'#AAAAAA',bg:'#0A0A0A',cn:'rgba(255,255,255,.15)',ct:'#FFFFFF'},
 ];
-const SL=[{id:'top',l:'이미지 상단'},{id:'bottom',l:'이미지 하단'},{id:'imgonly',l:'이미지 기본'},{id:'text',l:'텍스트 전용'},{id:'split',l:'반반 분할'}];
-const OL=[{id:'bg',l:'균일 오버레이'},{id:'grad-down',l:'↑ 그라데이션'},{id:'grad-up',l:'↓ 그라데이션'},{id:'grad-left',l:'→ 그라데이션'},{id:'colorwash',l:'컬러 워시'},{id:'vignette',l:'비네트'}];
+const SL=[{id:'top',l:'이미지 상단'},{id:'bottom',l:'이미지 하단'},{id:'text',l:'텍스트 전용'},{id:'imgonly',l:'이미지 기본'},{id:'split',l:'반반 분할'}];
+const OL=[{id:'bg',l:'균일 오버레이'},{id:'grad-down',l:'↑ 그라데이션'},{id:'vignette',l:'비네트'},{id:'grad-up',l:'↓ 그라데이션'},{id:'grad-left',l:'→ 그라데이션'},{id:'colorwash',l:'컬러 워시'}];
 const AL=[...SL,...OL];
 const RATIOS={
   portrait: {w:285,h:380, l:'카드뉴스', d:'3:4',   group:'card',    desc:'일반 카드뉴스'},
@@ -873,10 +873,10 @@ function renderEditor(){
   const isSplit=(c.layout==='split');
   const pal=PAL.find(p=>p.id===c.palette)||PAL[0];
 
-  const solidBtns=SL.map(l=>`<button class="lpick ${c.layout===l.id?'on':''}" data-l="${l.id}">
+  const _mkLayout=(list)=>list.map(l=>`<button class="lpick ${c.layout===l.id?'on':''}" data-l="${l.id}">
 <svg viewBox="0 0 72 50">${tSVG(l.id,pal.c1,pal.c2)}</svg><div class="lp-lbl">${l.l}</div></button>`).join('');
-  const ovBtns=OL.map(l=>`<button class="lpick ${c.layout===l.id?'on':''}" data-l="${l.id}">
-<svg viewBox="0 0 72 50">${tSVG(l.id,pal.c1,pal.c2)}</svg><div class="lp-lbl">${l.l}</div></button>`).join('');
+  const solidBtns=_mkLayout(_slExp?SL:SL.slice(0,3));
+  const ovBtns=_mkLayout(_olExp?OL:OL.slice(0,3));
 
   body.innerHTML=`
 <div class="sec-hd sec-hd-first">콘텐츠</div>
@@ -1067,10 +1067,12 @@ ${c.imgSrc?`
     <div class="lgrp">
       <div class="lgrp-hd"><span class="lgrp-badge s">기본형</span><span class="lgrp-desc">구역이 선명하게 나뉘는 레이아웃</span></div>
       <div class="lgrp-row" id="slPick">${solidBtns}</div>
+      ${_moreBtn('sl',_slExp)}
     </div>
     <div class="lgrp og">
       <div class="lgrp-hd"><span class="lgrp-badge o">오버레이형</span><span class="lgrp-desc">이미지 위에 텍스트가 겹치는 스타일</span></div>
       <div class="lgrp-row" id="olPick">${ovBtns}</div>
+      ${_moreBtn('ol',_olExp)}
     </div>
   </div>
 </div>
@@ -1104,23 +1106,28 @@ ${c.imgSrc?`
     <button id="fontApplyAll" style="font-size:9px;font-weight:700;color:var(--pink);background:rgba(190,242,100,0.1);border:1px solid rgba(190,242,100,0.25);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font);letter-spacing:.02em;white-space:nowrap">전체 슬라이드 적용</button>
   </div>
   <div class="font-grid" id="fontPick">
-    ${FONTS.map(f=>`<button class="font-btn ${c.font===f.id?'on':''}" data-f="${f.id}" title="${f.l}">
+    ${(_fontExp?FONTS:FONTS.slice(0,3)).map(f=>`<button class="font-btn ${c.font===f.id?'on':''}" data-f="${f.id}" title="${f.l}">
       <span class="font-btn-name">${f.l}${f.vi?` <span style="display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;background:rgba(0,180,120,0.18);color:rgba(80,220,160,0.95);font-size:8px;font-weight:700;letter-spacing:.04em;font-family:var(--font);vertical-align:middle;line-height:1.5">VI</span>`:''}</span>
       <span class="font-btn-preview" style="font-family:${f.stack}">${f.prev}</span>
     </button>`).join('')}
   </div>
+  ${_moreBtn('font',_fontExp)}
 </div>
 
 <div class="fg">
   <label class="fl">색상 테마</label>
   <div style="display:flex;gap:5px;flex-wrap:wrap" id="palPick">
-    ${PAL.map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
+    ${(_palExp?PAL:PAL.slice(0,3)).map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
   </div>
+  ${_moreBtn('pal',_palExp)}
 </div>
 
 <div class="fg">
-  <label class="fl">색상 직접 지정 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 적용</span></label>
-  <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <label class="fl" style="margin-bottom:0">색상 직접 지정 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 적용</span></label>
+    <button onclick="toggleExp('color')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font)">${_colorExp?'접기 ▲':'펼치기 ▼'}</button>
+  </div>
+  <div style="display:${_colorExp?'flex':'none'};flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
       <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
@@ -2129,6 +2136,18 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
     renderPreview();
   },{passive:true});
 })();
+
+// ── 에디터 섹션 더보기 상태 ──
+let _slExp=false, _olExp=false, _fontExp=false, _palExp=false, _colorExp=false;
+function toggleExp(key){
+  if(key==='sl')_slExp=!_slExp;
+  else if(key==='ol')_olExp=!_olExp;
+  else if(key==='font')_fontExp=!_fontExp;
+  else if(key==='pal')_palExp=!_palExp;
+  else if(key==='color')_colorExp=!_colorExp;
+  renderEditor();
+}
+const _moreBtn=(key,exp)=>`<button onclick="toggleExp('${key}')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:4px 0;cursor:pointer;font-family:var(--font);margin-top:5px;width:100%;transition:color .13s" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${exp?'접기 ▲':'더보기 ▼'}</button>`;
 
 // ── 모바일 탭 전환 ──
 function mobSwitch(panel){
