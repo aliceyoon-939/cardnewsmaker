@@ -1,6 +1,7 @@
 import './globals.css'
 
 export const metadata = { title: 'KPOP NOW - AI 콘텐츠 제작 툴', description: '베트남 케이팝 콘텐츠 플랫폼' }
+export const viewport = { width: 'device-width', initialScale: 1 }
 
 export default function RootLayout({ children }) {
   return (
