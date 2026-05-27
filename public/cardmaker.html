@@ -467,9 +467,9 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
         </div>
       </div>
     </div>
-    <div class="pr-copy-row" id="imgUrlRow" style="display:none">
-      <span class="pr-copy-url" id="imgUrlTxt">—</span>
-      <button class="pr-copy-btn" id="btnCopyUrl">복사</button>
+    <div class="pr-copy-row" id="imgUrlRow">
+      <span class="pr-copy-url" id="imgUrlTxt" style="color:var(--tt)">PNG 저장 후 URL이 생성됩니다</span>
+      <button class="pr-copy-btn" id="btnCopyUrl" disabled style="opacity:.4">복사</button>
     </div>
   </div>
 </div>
@@ -1939,20 +1939,15 @@ async function renderCardToCanvas(c){
   return cnv;
 }
 
-async function uploadToImgur(dataUrl){
-  // Strip data URL prefix to get base64
-  const base64=dataUrl.split(',')[1];
-  const resp=await fetch('https://api.imgur.com/3/image',{
+async function uploadToCloudinary(dataUrl){
+  const resp=await fetch('/api/upload',{
     method:'POST',
-    headers:{
-      'Authorization':'Client-ID 546c25a59c58ad7', // Imgur anonymous client ID
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify({image:base64,type:'base64'})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({dataUrl})
   });
-  if(!resp.ok) throw new Error('Imgur 업로드 실패');
   const data=await resp.json();
-  return data.data.link; // e.g. https://i.imgur.com/xxxxxxx.png
+  if(!resp.ok) throw new Error(data?.error||'Cloudinary 업로드 실패');
+  return data.url;
 }
 
 async function saveCard(fmt){
@@ -1978,19 +1973,12 @@ async function saveCard(fmt){
     a.download=`kpop-card-${Date.now()}.${fmt}`;
     a.click();
 
-    // Upload to Imgur for short URL
-    updateImgUrlRow(null,'업로드 중...');
-    const url=await uploadToImgur(dataUrl);
+    // Cloudinary 업로드 → 영구 URL 생성
+    updateImgUrlRow(null,'Cloudinary 업로드 중...');
+    const url=await uploadToCloudinary(dataUrl);
     updateImgUrlRow(url);
   }catch(e){
-    // Fallback: show blob URL if Imgur fails
-    try{
-      const cnv2=await renderCardToCanvas(c);
-      const dataUrl2=fmt==='png'?cnv2.toDataURL('image/png'):cnv2.toDataURL('image/jpeg',0.95);
-      const blob=await(await fetch(dataUrl2)).blob();
-      const blobUrl=URL.createObjectURL(blob);
-      updateImgUrlRow(blobUrl,'Imgur 실패 — Blob URL (탭 닫으면 만료)');
-    }catch{updateImgUrlRow(null,'링크 생성 실패');}
+    updateImgUrlRow(null,'⚠️ '+(e.message||'URL 생성 실패'));
   }finally{
     btn.innerHTML=orig;
     btnPng.disabled=false;
@@ -1998,20 +1986,19 @@ async function saveCard(fmt){
 }
 
 function updateImgUrlRow(url, hint){
-  const row=document.getElementById('imgUrlRow');
   const txt=document.getElementById('imgUrlTxt');
-  row.style.display='flex';
+  const btn=document.getElementById('btnCopyUrl');
   if(!url){
-    txt.textContent=hint||'';
+    txt.textContent=hint||'업로드 중...';
+    txt.style.color='var(--tt)';
     txt.dataset.full='';
+    if(btn){btn.disabled=true;btn.style.opacity='.4';}
     return;
   }
   txt.textContent=url;
+  txt.style.color='';
   txt.dataset.full=url;
-  // Update hint text
-  const hintEl=row.nextElementSibling;
-  if(hintEl&&hintEl.classList.contains('pr-url-hint'))
-    hintEl.textContent=hint||'';
+  if(btn){btn.disabled=false;btn.style.opacity='';}
 }
 
 document.getElementById('btnSavePng').addEventListener('click',()=>saveCard('png'));

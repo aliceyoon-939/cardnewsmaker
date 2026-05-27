@@ -32,6 +32,24 @@ const FIELDS = [
     desc: 'elevenlabs.io에서 발급 · 숏폼 TTS 음성 생성에 사용됩니다',
     placeholder: 'sk_...',
   },
+  {
+    key: 'CLOUDINARY_CLOUD_NAME',
+    label: 'Cloudinary Cloud Name',
+    desc: 'cloudinary.com 대시보드 상단 · 카드뉴스 이미지 URL 생성에 사용됩니다',
+    placeholder: 'your-cloud-name',
+  },
+  {
+    key: 'CLOUDINARY_API_KEY',
+    label: 'Cloudinary API Key',
+    desc: 'cloudinary.com → Settings → API Keys',
+    placeholder: '123456789012345',
+  },
+  {
+    key: 'CLOUDINARY_API_SECRET',
+    label: 'Cloudinary API Secret',
+    desc: 'cloudinary.com → Settings → API Keys',
+    placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxx',
+  },
 ]
 
 /* ── 비밀번호 게이트 ── */
@@ -105,8 +123,8 @@ function PasswordGate({ onAuthed }) {
 export default function SettingsPage() {
   const [authed, setAuthed] = useState(false)
   const [status, setStatus] = useState({})
-  const [values, setValues] = useState({ YOUTUBE_API_KEY: '', ANTHROPIC_API_KEY: '', SOLAR_API_KEY: '', GEMINI_API_KEY: '', ELEVENLABS_API_KEY: '' })
-  const [show, setShow] = useState({ YOUTUBE_API_KEY: false, ANTHROPIC_API_KEY: false, SOLAR_API_KEY: false, GEMINI_API_KEY: false, ELEVENLABS_API_KEY: false })
+  const [values, setValues] = useState({ YOUTUBE_API_KEY: '', ANTHROPIC_API_KEY: '', SOLAR_API_KEY: '', GEMINI_API_KEY: '', ELEVENLABS_API_KEY: '', CLOUDINARY_CLOUD_NAME: '', CLOUDINARY_API_KEY: '', CLOUDINARY_API_SECRET: '' })
+  const [show, setShow] = useState({ YOUTUBE_API_KEY: false, ANTHROPIC_API_KEY: false, SOLAR_API_KEY: false, GEMINI_API_KEY: false, ELEVENLABS_API_KEY: false, CLOUDINARY_CLOUD_NAME: false, CLOUDINARY_API_KEY: false, CLOUDINARY_API_SECRET: false })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
