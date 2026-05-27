@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { callSolar } from '@/app/lib/solar'
 export const dynamic = 'force-dynamic'
 
 // ── 인메모리 캐시 (15분) ─────────────────────────────────
@@ -43,11 +44,8 @@ function isKpopIdolNews(title) {
   return KPOP_NEWS_KEYWORDS.some(k => t.includes(k))
 }
 
-// ── 제목 일괄 한국어 번역 ─────────────────────────────────
+// ── 제목 일괄 한국어 번역 (Solar) ────────────────────────
 async function translateTitles(titles) {
-  const key = process.env.GEMINI_API_KEY
-  if (!key) return titles
-
   const numbered = titles.map((t, i) => `${i + 1}. ${t}`).join('\n')
   const prompt = `Translate these K-pop news headlines into Korean. Return ONLY JSON, no extra text.
 - Keep artist/group names as-is (BLACKPINK, aespa, IVE, etc.)
@@ -57,22 +55,7 @@ async function translateTitles(titles) {
 ${numbered}`
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 1024 },
-        }),
-      }
-    )
-    const data = await res.json()
-    if (data.error) throw new Error(data.error.message)
-
-    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '')
-      .replace(/```[\w]*\n?/g, '').trim()
+    const raw = await callSolar(prompt, 1024)
     const start = raw.indexOf('{')
     const end   = raw.lastIndexOf('}')
     const jsonStr = start !== -1 && end !== -1 ? raw.slice(start, end + 1) : raw

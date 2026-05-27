@@ -15,9 +15,15 @@ const FIELDS = [
     placeholder: 'sk-ant-api03-...',
   },
   {
+    key: 'SOLAR_API_KEY',
+    label: 'Upstage Solar API',
+    desc: 'console.upstage.ai에서 발급 · 뉴스 제목 번역·댓글 번역에 사용됩니다',
+    placeholder: 'up_...',
+  },
+  {
     key: 'GEMINI_API_KEY',
     label: 'Google Gemini API',
-    desc: 'aistudio.google.com에서 발급 · 번역·씬 재생성에 사용됩니다',
+    desc: 'aistudio.google.com에서 발급 · AI 이미지 생성·씬 재생성에 사용됩니다',
     placeholder: 'AIzaSy...',
   },
   {
@@ -99,8 +105,8 @@ function PasswordGate({ onAuthed }) {
 export default function SettingsPage() {
   const [authed, setAuthed] = useState(false)
   const [status, setStatus] = useState({})
-  const [values, setValues] = useState({ YOUTUBE_API_KEY: '', ANTHROPIC_API_KEY: '', GEMINI_API_KEY: '', ELEVENLABS_API_KEY: '' })
-  const [show, setShow] = useState({ YOUTUBE_API_KEY: false, ANTHROPIC_API_KEY: false, GEMINI_API_KEY: false, ELEVENLABS_API_KEY: false })
+  const [values, setValues] = useState({ YOUTUBE_API_KEY: '', ANTHROPIC_API_KEY: '', SOLAR_API_KEY: '', GEMINI_API_KEY: '', ELEVENLABS_API_KEY: '' })
+  const [show, setShow] = useState({ YOUTUBE_API_KEY: false, ANTHROPIC_API_KEY: false, SOLAR_API_KEY: false, GEMINI_API_KEY: false, ELEVENLABS_API_KEY: false })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')

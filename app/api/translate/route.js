@@ -1,23 +1,5 @@
 import { NextResponse } from 'next/server'
-
-async function callGemini(prompt) {
-  const key = process.env.GEMINI_API_KEY
-  if (!key) throw new Error('GEMINI_API_KEY 없음')
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 400 },
-      }),
-    }
-  )
-  const data = await res.json()
-  if (data.error) throw new Error(data.error.message)
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-}
+import { callSolar } from '@/app/lib/solar'
 
 export async function POST(req) {
   const { ko, text, target, artist } = await req.json()
@@ -58,7 +40,7 @@ ${artist ? `- 아티스트: ${artist}` : ''}
 JSON만 반환 (코드블록 없이): {"vi":"번역 결과"}`
 
   try {
-    const raw = await callGemini(prompt)
+    const raw = await callSolar(prompt, 400)
     const result = JSON.parse(raw.replace(/```json|```/g, '').trim())
     return NextResponse.json(result)
   } catch (e) {
