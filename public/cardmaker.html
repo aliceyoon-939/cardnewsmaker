@@ -180,14 +180,13 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 .ov-pct{font-size:10px;font-weight:700;color:var(--pink)}
 .ov-hint{font-size:8.5px;color:var(--tt);margin-top:5px}
 
-/* font picker */
-.font-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.font-btn{padding:12px 14px;border-radius:8px;border:1.5px solid var(--stroke);background:var(--bg-card-item);cursor:pointer;transition:all .13s;text-align:left;display:flex;flex-direction:column;gap:5px}
-.font-btn:hover{border-color:var(--stroke-hover);background:var(--bg-card-hover)}
-.font-btn.on{border-color:var(--pink);background:rgba(190,242,100,0.08)}
-.font-btn-name{font-size:9px;font-weight:600;color:var(--ts);font-family:var(--font)}
-.font-btn.on .font-btn-name{color:var(--pink)}
-.font-btn-preview{font-size:15px;color:var(--tp);line-height:1.25;font-weight:700}
+/* font picker — list style */
+.font-list-item{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-radius:7px;border:1.5px solid var(--stroke);background:var(--bg-card-item);cursor:pointer;transition:all .13s;font-family:var(--font);gap:10px;width:100%;text-align:left}
+.font-list-item:hover{border-color:var(--stroke-hover);background:var(--bg-card-hover)}
+.font-list-item.on{border-color:var(--pink);background:rgba(190,242,100,0.08)}
+.font-list-name{font-size:10px;font-weight:600;color:var(--ts);flex-shrink:0;white-space:nowrap}
+.font-list-item.on .font-list-name{color:var(--pink)}
+.font-list-preview{font-size:15px;font-weight:700;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;flex:1;min-width:0}
 
 /* sliders — no visible track border, just colored fill */
 .fsz-row{display:flex;flex-direction:column;gap:12px}
@@ -559,6 +558,9 @@ function selectPoolImg(idx){if(ai<0||!cards[ai]||!gThumbnails[idx])return;cards[
 let cropDrag=null; // {c,startX,startY,startCX,startCY,disp_h}
 
 /* IMAGE_RATIOS: aspect ratios for the image strip inside the card (top/bottom/split layouts) */
+/* 출력 규격 → 이미지 비율 자동 매핑 */
+const RATIO_TO_IMGR={portrait:'wide',square:'square',cms:'wide',facebook:'portrait',tiktok:'tall'};
+
 const IMG_RATIOS=[
   {id:'wide',   l:'와이드',   d:'16:9', ar:16/9},
   {id:'cinema', l:'시네마',   d:'21:9', ar:21/9},
@@ -879,7 +881,79 @@ function renderEditor(){
   const ovBtns=_mkLayout(_olExp?OL:OL.slice(0,3));
 
   body.innerHTML=`
-<div class="sec-hd sec-hd-first" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📝 콘텐츠</div>
+<!-- ── 📤 출력 설정 (최상단) ── -->
+<div class="sec-hd sec-hd-first" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📤 출력 설정</div>
+<div class="fg">
+  <label class="fl">규격</label>
+  <div style="display:flex;flex-direction:column;gap:10px" id="rpRow">
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">카드뉴스</div>
+      <div class="fmt-row">
+        ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1']].map(([id,name,dim])=>`
+        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
+          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">플랫폼</div>
+      <div class="fmt-row">
+        ${[['cms','배너','5:3'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
+        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
+          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+  </div>
+  ${!isOv?`<div style="margin-top:10px">
+    <div class="fl" style="margin-bottom:6px;font-size:9px">이미지 비율 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt)">${isSplit?'(분할 폭 기준)':'— 규격 변경 시 자동 설정'}</span></div>
+    <div class="ir-row" id="irRow">
+      ${IMG_RATIOS.map(ir=>{
+        const icoW=ir.ar>=1?16:Math.round(16*ir.ar);
+        const icoH=ir.ar<=1?14:Math.round(14/ir.ar);
+        const icon=`<svg width="${icoW}" height="${icoH}" viewBox="0 0 ${icoW} ${icoH}" fill="none"><rect x="0.5" y="0.5" width="${icoW-1}" height="${icoH-1}" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>`;
+        return `<button class="ir-btn ${c.imgRatio===ir.id?'on':''}" data-ir="${ir.id}">
+<div class="ir-icon">${icon}</div>
+<span class="ir-name">${ir.l}</span><span class="ir-dim">${ir.d}</span></button>`;
+      }).join('')}
+    </div>
+  </div>`:''}
+</div>
+
+<div class="fg">
+  <label class="fl">푸터 옵션</label>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
+    <button id="footerToggle" style="
+      display:flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:7px;
+      border:1.5px solid ${c.showFooter?'var(--pink)':'var(--stroke)'};
+      background:${c.showFooter?'rgba(190,242,100,0.08)':'transparent'};
+      color:${c.showFooter?'var(--pink)':'var(--ts)'};
+      font-family:var(--font);font-size:11px;font-weight:600;
+      cursor:pointer;transition:all .13s;width:100%">
+      <span style="width:32px;height:18px;border-radius:9px;flex-shrink:0;position:relative;background:${c.showFooter?'var(--pink)':'var(--stroke)'};transition:background .2s">
+        <span style="position:absolute;top:3px;left:${c.showFooter?'17':'3'}px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></span>
+      </span>
+      ${c.showFooter?'KPOP NOW · 표시됨':'푸터 숨김'}
+    </button>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:10px;font-weight:600;color:var(--ts)">푸터 위치</span>
+        <span style="font-size:10px;font-weight:700;color:var(--pink)" id="footerYPct">${Math.round((c.footerY??0.88)*100)}%</span>
+      </div>
+      <input type="range" class="ov-range" id="fFooterY" min="0" max="100" step="1" value="${Math.round((c.footerY??0.88)*100)}"/>
+      <span style="font-size:9px;color:var(--tt)">0% = 최상단 · 100% = 최하단</span>
+    </div>
+  </div>
+</div>
+
+<div class="fg">
+  <label class="fl">이미지 출처 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 우하단에 표시</span></label>
+  <input class="fi" id="fSource" value="${esc(gSource)}" placeholder="예) Image - YOUTUBE HYBE LABELS · AI 크롤링 시 자동 입력"/>
+</div>
+
+<!-- ── 📝 콘텐츠 ── -->
+<div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📝 콘텐츠</div>
 <div class="fg">
   <label class="fl">제목</label>
   <input class="fi" id="fTi" value="${esc(c.title)}" placeholder="카드 제목을 입력하세요"/>
@@ -889,6 +963,7 @@ function renderEditor(){
   <textarea class="fta" id="fBo" placeholder="카드 본문 내용을 입력하세요...">${esc(c.body)}</textarea>
 </div>
 
+<!-- ── 🖼 이미지 ── -->
 <div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">🖼 이미지</div>
 <div class="fg">
   <label class="fl">이미지 ${c.imgSrc?'<span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt)">— 드래그로 위치 조정</span>':''}</label>
@@ -941,20 +1016,6 @@ function renderEditor(){
       </div>
     </div>
   </div>
-
-  ${!isOv?`<div style="margin-top:8px">
-    <div class="fl" style="margin-bottom:4px">이미지 비율 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt)">${isSplit?'(분할 폭 기준)':''}</span></div>
-    <div class="ir-row" id="irRow">
-      ${IMG_RATIOS.map(ir=>{
-        const icoW=ir.ar>=1?16:Math.round(16*ir.ar);
-        const icoH=ir.ar<=1?14:Math.round(14/ir.ar);
-        const icon=`<svg width="${icoW}" height="${icoH}" viewBox="0 0 ${icoW} ${icoH}" fill="none"><rect x="0.5" y="0.5" width="${icoW-1}" height="${icoH-1}" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>`;
-        return `<button class="ir-btn ${c.imgRatio===ir.id?'on':''}" data-ir="${ir.id}">
-<div class="ir-icon">${icon}</div>
-<span class="ir-name">${ir.l}</span><span class="ir-dim">${ir.d}</span></button>`;
-      }).join('')}
-    </div>
-  </div>`:''}
 </div>
 
 ${gThumbnails.length>1?`
@@ -981,40 +1042,16 @@ ${c.imgSrc?`
   </div>
 </div>`:''}
 
+<!-- ── 🎨 디자인 ── -->
 <div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">🎨 디자인</div>
+
 <div class="fg">
   <label class="fl">레이아웃</label>
-  <div class="lgrp-wrap">
-    <div class="lgrp">
-      <div class="lgrp-hd"><span class="lgrp-badge s">기본형</span><span class="lgrp-desc">구역이 선명하게 나뉘는 레이아웃</span></div>
-      <div class="lgrp-row" id="slPick">${solidBtns}</div>
-      ${_moreBtn('sl',_slExp)}
-    </div>
-    <div class="lgrp og">
-      <div class="lgrp-hd"><span class="lgrp-badge o">오버레이형</span><span class="lgrp-desc">이미지 위에 텍스트가 겹치는 스타일</span></div>
-      <div class="lgrp-row" id="olPick">${ovBtns}</div>
-      ${_moreBtn('ol',_olExp)}
-    </div>
+  <div class="lgrp">
+    <div class="lgrp-hd"><span class="lgrp-badge s">기본형</span><span class="lgrp-desc">구역이 선명하게 나뉘는 레이아웃</span></div>
+    <div class="lgrp-row" id="slPick">${solidBtns}</div>
+    ${_moreBtn('sl',_slExp)}
   </div>
-</div>
-
-<div class="ov-box ${isOv?'':'dim'}" id="ovBox">
-  <div class="ov-hd">
-    <span class="ov-hd-lbl">오버레이 강도</span>
-    <span class="ov-pct" id="ovPct">${c.opacity}%</span>
-  </div>
-  <input type="range" class="ov-range" id="fOv" min="10" max="92" step="2" value="${c.opacity}"/>
-  <div class="ov-hint">${isOv?'낮을수록 이미지가 더 선명하게 보입니다':'오버레이형 레이아웃을 선택하면 활성화됩니다'}</div>
-  ${isOv?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
-    <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">텍스트 위치</div>
-    <div style="display:flex;gap:5px" id="textPosPick">
-      ${[['top','상단'],['center','중앙'],['bottom','하단']].map(([v,l])=>`
-      <button data-pos="${v}"
-        style="flex:1;padding:7px 0;font-size:10px;font-weight:600;border-radius:6px;border:1.5px solid ${(c.textPos||'bottom')===v?'var(--pink)':'var(--stroke)'};background:${(c.textPos||'bottom')===v?'rgba(190,242,100,0.08)':'var(--bg-card-item)'};color:${(c.textPos||'bottom')===v?'var(--pink)':'var(--ts)'};font-family:var(--font);cursor:pointer;transition:all .13s">
-        ${l}
-      </button>`).join('')}
-    </div>
-  </div>`:''}
 </div>
 
 <div class="fg">
@@ -1022,10 +1059,10 @@ ${c.imgSrc?`
     <label class="fl" style="margin-bottom:0">폰트</label>
     <button id="fontApplyAll" style="font-size:9px;font-weight:700;color:var(--pink);background:rgba(190,242,100,0.1);border:1px solid rgba(190,242,100,0.25);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font);letter-spacing:.02em;white-space:nowrap">전체 슬라이드 적용</button>
   </div>
-  <div class="font-grid" id="fontPick">
-    ${(_fontExp?FONTS:FONTS.slice(0,3)).map(f=>`<button class="font-btn ${c.font===f.id?'on':''}" data-f="${f.id}" title="${f.l}">
-      <span class="font-btn-name">${f.l}${f.vi?` <span style="display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;background:rgba(0,180,120,0.18);color:rgba(80,220,160,0.95);font-size:8px;font-weight:700;letter-spacing:.04em;font-family:var(--font);vertical-align:middle;line-height:1.5">VI</span>`:''}</span>
-      <span class="font-btn-preview" style="font-family:${f.stack}">${f.prev}</span>
+  <div id="fontPick" style="display:flex;flex-direction:column;gap:4px">
+    ${(_fontExp?FONTS:FONTS.slice(0,3)).map(f=>`<button class="font-list-item ${c.font===f.id?'on':''}" data-f="${f.id}">
+      <span class="font-list-name">${f.l}${f.vi?`<span style="display:inline-flex;align-items:center;padding:1px 4px;border-radius:3px;background:rgba(0,180,120,0.18);color:rgba(80,220,160,0.95);font-size:7px;font-weight:700;font-family:var(--font);margin-left:3px">VI</span>`:''}</span>
+      <span class="font-list-preview" style="font-family:${f.stack}">${f.prev}</span>
     </button>`).join('')}
   </div>
   ${_moreBtn('font',_fontExp)}
@@ -1034,17 +1071,10 @@ ${c.imgSrc?`
 <div class="fg">
   <label class="fl">색상 테마</label>
   <div style="display:flex;gap:5px;flex-wrap:wrap" id="palPick">
-    ${(_palExp?PAL:PAL.slice(0,3)).map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
+    ${PAL.map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
   </div>
-  ${_moreBtn('pal',_palExp)}
-</div>
-
-<div class="fg">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <label class="fl" style="margin-bottom:0">색상 직접 지정 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 적용</span></label>
-    <button onclick="toggleExp('color')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font)">${_colorExp?'접기 ▲':'펼치기 ▼'}</button>
-  </div>
-  <div style="display:${_colorExp?'flex':'none'};flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
+  <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:8px">
+    <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em">색상 직접 지정 <span style="font-size:8px;font-weight:500;color:var(--tt);text-transform:none;letter-spacing:0">· 전체 슬라이드 적용</span></div>
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
       <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
@@ -1066,6 +1096,35 @@ ${c.imgSrc?`
   </div>
 </div>
 
+<!-- 고급 디자인 설정 토글 -->
+<button onclick="toggleExp('adv')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:6px 0;cursor:pointer;font-family:var(--font);width:100%;transition:color .13s;letter-spacing:.02em" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${_advDesignExp?'고급 디자인 접기 ▲':'고급 디자인 설정 ▼'}</button>
+<div style="display:${_advDesignExp?'flex':'none'};flex-direction:column;gap:14px;margin-top:2px">
+  <div class="lgrp og">
+    <div class="lgrp-hd"><span class="lgrp-badge o">오버레이형</span><span class="lgrp-desc">이미지 위에 텍스트가 겹치는 스타일</span></div>
+    <div class="lgrp-row" id="olPick">${ovBtns}</div>
+    ${_moreBtn('ol',_olExp)}
+  </div>
+  <div class="ov-box ${isOv?'':'dim'}" id="ovBox">
+    <div class="ov-hd">
+      <span class="ov-hd-lbl">오버레이 강도</span>
+      <span class="ov-pct" id="ovPct">${c.opacity}%</span>
+    </div>
+    <input type="range" class="ov-range" id="fOv" min="10" max="92" step="2" value="${c.opacity}"/>
+    <div class="ov-hint">${isOv?'낮을수록 이미지가 더 선명하게 보입니다':'오버레이형 레이아웃을 선택하면 활성화됩니다'}</div>
+    ${isOv?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
+      <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">텍스트 위치</div>
+      <div style="display:flex;gap:5px" id="textPosPick">
+        ${[['top','상단'],['center','중앙'],['bottom','하단']].map(([v,l])=>`
+        <button data-pos="${v}"
+          style="flex:1;padding:7px 0;font-size:10px;font-weight:600;border-radius:6px;border:1.5px solid ${(c.textPos||'bottom')===v?'var(--pink)':'var(--stroke)'};background:${(c.textPos||'bottom')===v?'rgba(190,242,100,0.08)':'var(--bg-card-item)'};color:${(c.textPos||'bottom')===v?'var(--pink)':'var(--ts)'};font-family:var(--font);cursor:pointer;transition:all .13s">
+          ${l}
+        </button>`).join('')}
+      </div>
+    </div>`:''}
+  </div>
+</div>
+
+<!-- ── ✏️ 텍스트 설정 ── -->
 <div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">✏️ 텍스트 설정</div>
 <div class="fg">
   <label class="fl">텍스트 크기 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt);font-size:9px">이미지가 클 때 자동 축소됨</span></label>
@@ -1099,14 +1158,8 @@ ${c.imgSrc?`
 </div>
 
 <div class="fg">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <label class="fl" style="margin-bottom:0">텍스트 위치 조정</label>
-    <button id="textOffToggle" style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid var(--stroke);background:var(--bg-card-item);color:var(--ts);font-size:10px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .13s">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="textOffArrow" style="transition:transform .2s"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      세부 조정
-    </button>
-  </div>
-  <div id="textOffPanel" style="display:none;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:4px">
+  <label class="fl">텍스트 위치 조정</label>
+  <div id="textOffPanel" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:4px">
     <div class="fsz-item">
       <span class="fsz-lbl" style="width:36px;color:var(--ts)">제목</span>
       <input type="range" class="fsz-range" id="fTitleOffY" min="-120" max="120" step="1" value="${c.titleOffsetY||0}"/>
@@ -1120,63 +1173,6 @@ ${c.imgSrc?`
       <button data-reset="fBodyOffY" style="margin-left:4px;padding:2px 7px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-input);color:var(--ts);font-size:9px;font-family:var(--font);cursor:pointer">↺</button>
     </div>
   </div>
-</div>
-
-<div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📤 출력 설정</div>
-<div class="fg">
-  <label class="fl">규격</label>
-  <div style="display:flex;flex-direction:column;gap:10px" id="rpRow">
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">카드뉴스</div>
-      <div class="fmt-row">
-        ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">플랫폼</div>
-      <div class="fmt-row">
-        ${[['cms','배너','5:3'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="fg">
-  <label class="fl">푸터 옵션</label>
-  <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
-    <button id="footerToggle" style="
-      display:flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:7px;
-      border:1.5px solid ${c.showFooter?'var(--pink)':'var(--stroke)'};
-      background:${c.showFooter?'rgba(190,242,100,0.08)':'transparent'};
-      color:${c.showFooter?'var(--pink)':'var(--ts)'};
-      font-family:var(--font);font-size:11px;font-weight:600;
-      cursor:pointer;transition:all .13s;width:100%">
-      <span style="width:32px;height:18px;border-radius:9px;flex-shrink:0;position:relative;background:${c.showFooter?'var(--pink)':'var(--stroke)'};transition:background .2s">
-        <span style="position:absolute;top:3px;left:${c.showFooter?'17':'3'}px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></span>
-      </span>
-      ${c.showFooter?'KPOP NOW · 표시됨':'푸터 숨김'}
-    </button>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:10px;font-weight:600;color:var(--ts)">푸터 위치</span>
-        <span style="font-size:10px;font-weight:700;color:var(--pink)" id="footerYPct">${Math.round((c.footerY??0.88)*100)}%</span>
-      </div>
-      <input type="range" class="ov-range" id="fFooterY" min="0" max="100" step="1" value="${Math.round((c.footerY??0.88)*100)}"/>
-      <span style="font-size:9px;color:var(--tt)">0% = 최상단 · 100% = 최하단</span>
-    </div>
-  </div>
-</div>
-
-<div class="fg">
-  <label class="fl">이미지 출처 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 우하단에 표시</span></label>
-  <input class="fi" id="fSource" value="${esc(gSource)}" placeholder="예) Image - YOUTUBE HYBE LABELS · AI 크롤링 시 자동 입력"/>
 </div>`;
 
   requestAnimationFrame(() => { body.scrollTop = savedScroll; });
@@ -1199,15 +1195,6 @@ ${c.imgSrc?`
     cards[ai].textAlign=b.dataset.align;
     renderAll();
   }));
-
-  /* text position fold toggle */
-  document.getElementById('textOffToggle').addEventListener('click',()=>{
-    const p=document.getElementById('textOffPanel');
-    const a=document.getElementById('textOffArrow');
-    const open=p.style.display==='none';
-    p.style.display=open?'flex':'none';
-    a.style.transform=open?'rotate(180deg)':'';
-  });
 
   /* title Y offset */
   const fTitleOffY=document.getElementById('fTitleOffY');
@@ -1385,6 +1372,9 @@ ${c.imgSrc?`
   document.getElementById('rpRow').querySelectorAll('.fmt-chip').forEach(b=>b.addEventListener('click',()=>{
     const prev=cards[ai].ratio;
     cards[ai].ratio=b.dataset.r;
+    // 규격 변경 시 이미지 비율 자동 연동
+    const autoIr=RATIO_TO_IMGR[b.dataset.r];
+    if(autoIr) cards[ai].imgRatio=autoIr;
     if(b.dataset.r==='cms'){
       cards[ai].layout='imgonly';
       cards[ai].showFooter=false;
@@ -2123,7 +2113,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
 })();
 
 // ── 에디터 섹션 더보기 상태 ──
-let _slExp=false, _olExp=false, _fontExp=false, _palExp=false, _colorExp=false;
+let _slExp=false, _olExp=false, _fontExp=false, _palExp=false, _colorExp=false, _advDesignExp=false;
 function toggleAiPanel(){
   const panel=document.getElementById('aiGenPanel');
   if(!panel)return;
@@ -2142,6 +2132,7 @@ function toggleExp(key){
   else if(key==='font')_fontExp=!_fontExp;
   else if(key==='pal')_palExp=!_palExp;
   else if(key==='color')_colorExp=!_colorExp;
+  else if(key==='adv')_advDesignExp=!_advDesignExp;
   renderEditor();
 }
 const _moreBtn=(key,exp)=>`<button onclick="toggleExp('${key}')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:4px 0;cursor:pointer;font-family:var(--font);margin-top:5px;width:100%;transition:color .13s" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${exp?'접기 ▲':'더보기 ▼'}</button>`;
