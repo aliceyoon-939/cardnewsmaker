@@ -49,17 +49,16 @@ function urlKey(u, depth = 0) {
 }
 
 // 본문 영역 HTML에서 이미지 URL 추출
+// 우선순위: 본문 <img> 태그 → og:image(폴백)
+// og:image는 SNS 공유용 썸네일이라 기사 대표 사진과 다를 수 있으므로 후순위로 처리
 function extractImages(contentHtml, baseUrl, ogImage) {
   const images = []
-  const seen = new Set()  // 정규화 키로 중복 검사
+  const seen = new Set()
 
-  // og:image를 첫 번째로
-  if (ogImage) {
-    seen.add(urlKey(ogImage))
-    images.push(ogImage)
-  }
+  // og:image 키를 중복 체크용으로만 예약 (아직 삽입 안 함)
+  const ogKey = ogImage ? urlKey(ogImage) : null
 
-  // <img src="..." /> 태그 전체 추출
+  // <img src="..." /> 태그 전체 추출 (본문 이미지 우선)
   const imgTagRe = /<img[^>]+>/gi
   let match
   while ((match = imgTagRe.exec(contentHtml)) !== null) {
@@ -106,6 +105,12 @@ function extractImages(contentHtml, baseUrl, ogImage) {
     }
 
     if (images.length >= 5) break
+  }
+
+  // og:image 폴백: 본문에 없는 이미지일 때만 마지막에 추가.
+  // 본문 이미지가 0장이면 og:image가 유일한 이미지가 됨.
+  if (ogImage && images.length < 5 && (!ogKey || !seen.has(ogKey))) {
+    images.push(ogImage)
   }
 
   return images

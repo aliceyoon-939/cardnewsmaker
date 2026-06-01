@@ -397,7 +397,23 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
   .mob-tab.on svg{opacity:1}
   .pr-area{padding-bottom:8px}
 }
+.save-all-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 11px;border-radius:7px;border:1.5px solid var(--stroke);background:var(--bg-card-item);color:var(--ts);font-size:10px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .13s;white-space:nowrap;flex-shrink:0}
+.save-all-btn:hover{border-color:var(--pink);color:var(--pink);background:rgba(190,242,100,0.06)}
+.save-all-btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.batch-url-wrap{display:none;flex-direction:column;gap:5px}
+.batch-url-wrap.open{display:flex}
+.batch-url-header{display:flex;align-items:center;justify-content:space-between}
+.batch-url-title{font-size:10px;font-weight:700;color:var(--ts)}
+.batch-url-list{display:flex;flex-direction:column;gap:4px}
+.batch-url-item{display:flex;align-items:center;gap:6px;background:var(--bg-input);border:1px solid var(--stroke);border-radius:7px;padding:5px 10px}
+.batch-url-num{font-size:9px;font-weight:700;color:var(--tt);flex-shrink:0;min-width:14px;text-align:center}
+.batch-url-txt{flex:1;font-size:10px;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-weight:500}
+.batch-url-copy{padding:3px 8px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-card-item);color:var(--ts);font-size:9px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .13s;white-space:nowrap;flex-shrink:0}
+.batch-url-copy:hover{border-color:var(--stroke-hover);color:var(--tp)}
+.batch-url-copy:disabled{opacity:.38;cursor:not-allowed}
+.batch-progress{font-size:11px;color:var(--tt);text-align:center;padding:7px 0}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -466,10 +482,21 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
           </div>
         </div>
       </div>
+      <button class="save-all-btn" id="btnSaveAll" title="전체 카드 ZIP 다운로드 + Cloudinary URL 생성">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 7v3a1 1 0 001 1h8a1 1 0 001-1V7M6 1v6M3 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        전체 저장
+      </button>
     </div>
     <div class="pr-copy-row" id="imgUrlRow">
       <span class="pr-copy-url" id="imgUrlTxt" style="color:var(--tt)">PNG 저장 후 URL이 생성됩니다</span>
       <button class="pr-copy-btn" id="btnCopyUrl" disabled style="opacity:.4">복사</button>
+    </div>
+    <div class="batch-url-wrap" id="batchUrlWrap">
+      <div class="batch-url-header">
+        <span class="batch-url-title">전체 URL 목록</span>
+        <button class="pr-copy-btn" id="btnCopyAllUrls" disabled style="opacity:.4">전체 복사</button>
+      </div>
+      <div class="batch-url-list" id="batchUrlList"></div>
     </div>
   </div>
 </div>
@@ -645,11 +672,17 @@ function drawCropCanvas(c, canvas){
 const _imgCache={};
 function getImg(src){
   if(_imgCache[src]) return Promise.resolve(_imgCache[src]);
+  /* 외부 URL(http/https)은 프록시를 통해 로드 → canvas tainted 방지.
+     crossOrigin='anonymous' + 프록시의 Access-Control-Allow-Origin:* 조합으로
+     toDataURL() 호출이 가능해진다. data:, blob:, 상대 경로는 프록시 불필요. */
+  const isExternal=/^https?:\/\//i.test(src);
+  const loadSrc=isExternal?'/api/proxy-image?url='+encodeURIComponent(src):src;
   return new Promise((res,rej)=>{
     const img=new Image();
+    if(isExternal) img.crossOrigin='anonymous';
     img.onload=()=>{_imgCache[src]=img;res(img);};
     img.onerror=rej;
-    img.src=src;
+    img.src=loadSrc;
   });
 }
 
@@ -690,7 +723,7 @@ function buildCropUI(c, container){
 
   container.innerHTML=`
 <div class="crop-wrap">
-  <div class="crop-viewport" id="cpV" style="width:${CW}px;height:${dh}px">
+  <div class="crop-viewport" id="cpV" style="width:${CW}px;height:${dh}px;cursor:move">
     <canvas id="cpC" width="${CW}" height="${dh}"></canvas>
     <svg class="crop-grid" viewBox="0 0 ${CW} ${dh}">
       <line x1="${CW/3}"   y1="0"   x2="${CW/3}"   y2="${dh}"/>
@@ -713,11 +746,58 @@ function buildCropUI(c, container){
   const cnv=document.getElementById('cpC');
   drawCropCanvas(c, cnv);
 
-  /* ensure image is cached before drag starts */
   let cachedImg=_imgCache[c.imgSrc]||null;
-  getImg(c.imgSrc).then(img=>{cachedImg=img;});
 
-  /* pointer drag */
+  /* ── sc 기준: 100% = 커버 피팅 (이미지가 뷰포트를 빈 칸 없이 딱 채우는 최소 배율)
+     슬라이더 min=100 → 사용자가 100%까지 축소 가능.
+     calcDefaultSc: 이미지 첫 로드 시 양축에 작은 여유(약 10%)를 줘서
+     처음부터 상하좌우 팬이 가능하도록 자동 설정. 사용자가 슬라이더로 100%로 되돌릴 수 있다. */
+  function calcDefaultSc(iw,ih){
+    /* 각 축에 뷰포트 크기의 10% 여유 → 처음부터 양방향 팬 가능, 과도한 줌 없음 */
+    const baseFit=Math.max(CW/iw, dh/ih);
+    return Math.max(
+      (CW + CW*0.10)/(iw*baseFit),
+      (dh + dh*0.10)/(ih*baseFit),
+      1.0
+    );
+  }
+  function applyMinSc(){
+    if(!cachedImg)return;
+    const iw=cachedImg.naturalWidth, ih=cachedImg.naturalHeight;
+    const sl=document.getElementById('cpZ');
+    /* 슬라이더 min은 항상 100 (커버 피팅 최솟값) — 사용자가 100%까지 축소 가능 */
+    if(sl) sl.min=100;
+    /* sc가 1.0 미만이면 커버 피팅 보정 (검은 여백 방지) */
+    if(c.crop.sc < 1.0){
+      c.crop.sc=1.0;
+      if(sl){sl.value=100; document.getElementById('cpZv').textContent='100%';}
+      drawCropCanvas(c, document.getElementById('cpC'));
+      renderPreview();
+      return;
+    }
+    /* 첫 로드(sc===1)일 때만 기본 줌을 자동 설정해 양방향 팬 여유 확보 */
+    if(c.crop.sc===1){
+      const defSc=calcDefaultSc(iw,ih);
+      if(defSc>1){
+        c.crop.sc=defSc;
+        const pct=Math.round(defSc*100);
+        if(sl){sl.value=pct; document.getElementById('cpZv').textContent=pct+'%';}
+        drawCropCanvas(c, document.getElementById('cpC'));
+        renderPreview();
+      }
+    }
+  }
+
+  /* 이미지가 이미 캐시돼 있으면 즉시 적용, 아니면 로드 후 적용 */
+  if(cachedImg) applyMinSc();
+  getImg(c.imgSrc).then(img=>{cachedImg=img; applyMinSc();});
+
+  /* ── AbortController로 이전 buildCropUI 호출의 window 리스너를 정리 ──
+     renderAll() 이 반복 호출되면 mousemove 리스너가 누적되는 문제를 방지한다. */
+  if(window._cropAbort) window._cropAbort.abort();
+  window._cropAbort=new AbortController();
+  const _sig=window._cropAbort.signal;
+
   const vp=document.getElementById('cpV');
   function startDrag(px,py){
     cropDrag={c, startX:px, startY:py, startCX:c.crop.x, startCY:c.crop.y, dh};
@@ -727,19 +807,21 @@ function buildCropUI(c, container){
     if(!cropDrag||cropDrag.c!==c)return;
     if(!cachedImg)return;
     const iw=cachedImg.naturalWidth, ih=cachedImg.naturalHeight;
-    const fit=Math.max(CW/iw, cropDrag.dh/ih);
-    const sc=fit*c.crop.sc;
+    const baseFit=Math.max(CW/iw, dh/ih);
+    /* 드래그 중 sc가 1.0 미만이면 커버 피팅 보정 (검은 여백 방지) */
+    if(c.crop.sc<1.0) c.crop.sc=1.0;
+    const sc=baseFit*c.crop.sc;
     const sw=iw*sc, sh=ih*sc;
-    c.crop.x=Math.max(0,Math.min(1, cropDrag.startCX - (px-cropDrag.startX)/sw));
-    c.crop.y=Math.max(0,Math.min(1, cropDrag.startCY - (py-cropDrag.startY)/sh));
+    c.crop.x=Math.max(0,Math.min(1, cropDrag.startCX-(px-cropDrag.startX)/sw));
+    c.crop.y=Math.max(0,Math.min(1, cropDrag.startCY-(py-cropDrag.startY)/sh));
     drawCropCanvas(c, document.getElementById('cpC'));
     renderPreview();
   }
   function endDrag(){if(cropDrag){cropDrag=null;vp.classList.remove('dragging')}}
 
   vp.addEventListener('mousedown',e=>{e.preventDefault();startDrag(e.clientX,e.clientY)});
-  window.addEventListener('mousemove',e=>{moveDrag(e.clientX,e.clientY)});
-  window.addEventListener('mouseup',endDrag);
+  window.addEventListener('mousemove',e=>{moveDrag(e.clientX,e.clientY)},{signal:_sig});
+  window.addEventListener('mouseup',endDrag,{signal:_sig});
   vp.addEventListener('touchstart',e=>{const t=e.touches[0];startDrag(t.clientX,t.clientY)},{passive:true});
   vp.addEventListener('touchmove',e=>{const t=e.touches[0];moveDrag(t.clientX,t.clientY)},{passive:true});
   vp.addEventListener('touchend',endDrag,{passive:true});
@@ -752,11 +834,13 @@ function buildCropUI(c, container){
     renderPreview();
   });
 
-  /* reset */
+  /* reset — sc를 1로 초기화 후 applyMinSc로 최솟값 보정 */
   document.getElementById('cpRst').addEventListener('click',()=>{
-    c.crop={x:.5,y:.5,sc:1};
-    document.getElementById('cpZ').value=100;
-    document.getElementById('cpZv').textContent='100%';
+    c.crop.x=.5; c.crop.y=.5; c.crop.sc=1;
+    applyMinSc();
+    const pct=Math.round(c.crop.sc*100);
+    document.getElementById('cpZ').value=pct;
+    document.getElementById('cpZv').textContent=pct+'%';
     drawCropCanvas(c, document.getElementById('cpC'));
     renderPreview();
   });
@@ -1018,7 +1102,7 @@ function renderEditor(){
   </div>
 </div>
 
-${gThumbnails.length>1?`
+${gThumbnails.length>0?`
 <div class="fg">
   <label class="fl">이미지 풀 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt)">${gThumbnails.length}장</span></label>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
@@ -1860,7 +1944,7 @@ async function renderCardToCanvas(c){
     ctx.restore();
   }
 
-  // title
+  // title — word-wrap (공백 기준, 한 단어가 너무 길면 그대로 출력)
   const pvTitle=area.querySelector('#pv-title');
   if(pvTitle&&c.title){
     const ts=getComputedStyle(pvTitle);
@@ -1872,10 +1956,20 @@ async function renderCardToCanvas(c){
     ctx.fillStyle=gTextColor||'#fff';
     ctx.textAlign=ta==='right'?'right':ta==='center'?'center':'left';
     const ax=ta==='right'?x+w:ta==='center'?x+w/2:x;
-    // word-wrap to fit width
-    const words=c.title.split('');let line='';let cy=y+sz;
-    // simple char wrap
-    ctx.fillText(c.title,ax,cy);
+    const rawTLines=c.title.split('\n');
+    let cy=y+sz;
+    for(const raw of rawTLines){
+      const words=raw.split(' ');
+      let line='';
+      for(const word of words){
+        const test=line?line+' '+word:word;
+        if(ctx.measureText(test).width>w&&line){
+          ctx.fillText(line,ax,cy); line=word; cy+=lh;
+        }else{line=test;}
+      }
+      if(line) ctx.fillText(line,ax,cy);
+      cy+=lh;
+    }
     ctx.restore();
   }
 
@@ -1913,12 +2007,12 @@ async function renderCardToCanvas(c){
   // 5. Source credit
   if(gSource){
     ctx.save();
-    ctx.font=`400 ${Math.round(sc*7)}px ${fontDef.stack}`;
+    ctx.font=`400 7px ${fontDef.stack}`;
     ctx.fillStyle='rgba(255,255,255,0.28)';
     ctx.textAlign='right';
     ctx.shadowColor='rgba(0,0,0,0.7)';
     ctx.shadowBlur=3;
-    ctx.fillText(gSource, rw-px, rh-Math.round(sc*6));
+    ctx.fillText(gSource, rw-px, rh-6);
     ctx.restore();
   }
 
@@ -1937,6 +2031,67 @@ async function renderCardToCanvas(c){
   }
 
   return cnv;
+}
+
+/* ══ DOM-CAPTURE EXPORT ══
+   html2canvas로 미리보기 DOM(.cr)을 직접 캡처 → 수동 canvas 재드로우 불필요.
+   미리보기와 완전히 동일한 결과를 3× 해상도로 저장.
+*/
+async function captureCardDOM(c){
+  const r=RATIOS[c.ratio]||RATIOS.portrait;
+  const area=document.getElementById('pArea');
+  const cardEl=area.querySelector('.cr');
+  if(!cardEl)return null;
+
+  // html2canvas 지연 로딩 (최초 호출 시만)
+  if(!window.html2canvas){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  // 카드 요소 클론 (cloneNode는 canvas 픽셀을 복사하지 않음)
+  const clone=cardEl.cloneNode(true);
+
+  // 원본 canvas 픽셀 → 클론 canvas로 복사
+  const origCnvs=[...cardEl.querySelectorAll('canvas')];
+  const cloneCnvs=[...clone.querySelectorAll('canvas')];
+  origCnvs.forEach((orig,i)=>{
+    try{
+      const cl=cloneCnvs[i];
+      if(!cl)return;
+      cl.width=orig.width; cl.height=orig.height;
+      cl.getContext('2d').drawImage(orig,0,0);
+    }catch(_){}
+  });
+
+  // 인라인 style에서 scale 트랜스폼 제거 후 고정 위치로 오프스크린 배치
+  let st=clone.getAttribute('style')||'';
+  st=st.replace(/\btransform\s*:[^;]+;?\s*/gi,'');
+  st=st.replace(/\btransform-origin\s*:[^;]+;?\s*/gi,'');
+  clone.setAttribute('style',st);
+  clone.style.position='fixed';
+  clone.style.left='0'; clone.style.top='0';
+  clone.style.zIndex='-1';
+  clone.style.pointerEvents='none';
+  document.body.appendChild(clone);
+
+  try{
+    return await window.html2canvas(clone,{
+      scale:3,
+      width:r.w, height:r.h,
+      x:0, y:0,
+      useCORS:true,
+      allowTaint:false,
+      logging:false,
+      backgroundColor:null,
+    });
+  }finally{
+    document.body.removeChild(clone);
+  }
 }
 
 async function uploadToCloudinary(dataUrl){
@@ -1963,7 +2118,7 @@ async function saveCard(fmt){
   document.getElementById('saveDrop').classList.remove('open');
 
   try{
-    const cnv=await renderCardToCanvas(c);
+    const cnv=await captureCardDOM(c);
     if(!cnv)return;
     const dataUrl=fmt==='png'?cnv.toDataURL('image/png'):cnv.toDataURL('image/jpeg',0.95);
 
@@ -2013,6 +2168,108 @@ document.getElementById('btnCopyUrl').addEventListener('click',()=>{
     b.textContent='복사됨 ✓';setTimeout(()=>b.textContent='복사',1600);
   });
 });
+document.getElementById('btnSaveAll').addEventListener('click',saveAllCards);
+document.getElementById('btnCopyAllUrls').addEventListener('click',()=>{
+  const urls=document.getElementById('btnCopyAllUrls').dataset.urls||'';
+  if(!urls)return;
+  navigator.clipboard.writeText(urls).then(()=>{
+    const b=document.getElementById('btnCopyAllUrls');
+    const orig=b.textContent;
+    b.textContent='복사됨 ✓';setTimeout(()=>b.textContent=orig,1600);
+  });
+});
+
+async function saveAllCards(){
+  if(!cards.length)return;
+  if(!window.JSZip){alert('JSZip 로딩 중입니다. 잠시 후 다시 시도해주세요.');return;}
+  const btn=document.getElementById('btnSaveAll');
+  const btnPng=document.getElementById('btnSavePng');
+  const batchWrap=document.getElementById('batchUrlWrap');
+  const batchList=document.getElementById('batchUrlList');
+  const copyAllBtn=document.getElementById('btnCopyAllUrls');
+
+  btn.disabled=true;
+  btnPng.disabled=true;
+  batchWrap.classList.add('open');
+  copyAllBtn.disabled=true;
+  copyAllBtn.style.opacity='.4';
+  copyAllBtn.dataset.urls='';
+
+  const savedAi=ai;
+
+  function setProgress(msg){
+    batchList.innerHTML=`<div class="batch-progress">${msg}</div>`;
+  }
+
+  try{
+    // ── Phase 1: Render all cards to canvas ──
+    const rendered=[];
+    for(let i=0;i<cards.length;i++){
+      setProgress(`카드 렌더링 중... (${i+1} / ${cards.length})`);
+      ai=i;
+      renderPreview();
+      // Wait 2 rAF cycles for layout to settle
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const cnv=await captureCardDOM(cards[i]);
+      if(!cnv)continue;
+      rendered.push({idx:i,dataUrl:cnv.toDataURL('image/png')});
+    }
+
+    // ── Phase 2: Build ZIP ──
+    setProgress('ZIP 파일 생성 중...');
+    const zip=new JSZip();
+    for(const{idx,dataUrl}of rendered){
+      const b64=dataUrl.split(',')[1];
+      zip.file(`card-${String(idx+1).padStart(2,'0')}.png`,b64,{base64:true});
+    }
+    const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    const zipUrl=URL.createObjectURL(blob);
+    const aEl=document.createElement('a');
+    aEl.href=zipUrl;
+    aEl.download=`kpop-cardnews-${Date.now()}.zip`;
+    aEl.click();
+    setTimeout(()=>URL.revokeObjectURL(zipUrl),5000);
+
+    // ── Phase 3: Upload to Cloudinary & show URL list ──
+    batchList.innerHTML='';
+    const collectedUrls=[];
+    for(const{idx,dataUrl}of rendered){
+      const row=document.createElement('div');
+      row.className='batch-url-item';
+      row.innerHTML=`<span class="batch-url-num">${idx+1}</span><span class="batch-url-txt" style="color:var(--tt)">업로드 중...</span><button class="batch-url-copy" disabled style="opacity:.4">복사</button>`;
+      batchList.appendChild(row);
+      try{
+        const url=await uploadToCloudinary(dataUrl);
+        collectedUrls.push(url);
+        const copyBtn=`<button class="batch-url-copy" onclick="copyBatchUrl(this,'${url.replace(/'/g,'%27')}')">복사</button>`;
+        row.innerHTML=`<span class="batch-url-num">${idx+1}</span><span class="batch-url-txt" title="${url}">${url}</span>${copyBtn}`;
+      }catch(e){
+        row.innerHTML=`<span class="batch-url-num">${idx+1}</span><span class="batch-url-txt" style="color:#f87171">⚠️ ${e.message||'업로드 실패'}</span><button class="batch-url-copy" disabled style="opacity:.4">복사</button>`;
+      }
+    }
+    if(collectedUrls.length>0){
+      copyAllBtn.disabled=false;
+      copyAllBtn.style.opacity='';
+      copyAllBtn.dataset.urls=collectedUrls.join('\n');
+    }
+  }catch(e){
+    setProgress(`<span style="color:#f87171">⚠️ ${e.message||'오류가 발생했습니다'}</span>`);
+  }finally{
+    ai=savedAi;
+    renderAll();
+    btn.disabled=false;
+    btnPng.disabled=false;
+  }
+}
+
+function copyBatchUrl(btn,url){
+  const decoded=decodeURIComponent(url);
+  navigator.clipboard.writeText(decoded).then(()=>{
+    const orig=btn.textContent;
+    btn.textContent='복사됨 ✓';
+    setTimeout(()=>btn.textContent=orig,1600);
+  });
+}
 const MOON_ICO=`<path d="M12 12.5A5 5 0 0 1 6.5 4c0-.34.03-.67.09-1A6 6 0 1 0 13 11.91c-.33.06-.67.09-1 .09z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>`;
 const SUN_ICO=`<path d="M8 1v1M8 14v1M1 8h1M14 8h1M3.05 3.05l.7.7M12.25 12.25l.7.7M3.05 12.95l.7-.7M12.25 3.75l.7-.7M11 8A3 3 0 1 1 5 8a3 3 0 0 1 6 0z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>`;
 let isLight=false;
