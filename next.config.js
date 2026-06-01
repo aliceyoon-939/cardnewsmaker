@@ -13,5 +13,6 @@ if (fs.existsSync(envPath)) {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  serverExternalPackages: ['cloudinary'],
 }
 module.exports = nextConfig
