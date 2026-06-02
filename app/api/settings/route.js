@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 
 const ENV_PATH = path.join(process.cwd(), '.env.local')
-const KEYS = ['YOUTUBE_API_KEY', 'ANTHROPIC_API_KEY', 'GEMINI_API_KEY', 'ELEVENLABS_API_KEY']
+const KEYS = ['YOUTUBE_API_KEY', 'ANTHROPIC_API_KEY', 'SOLAR_API_KEY', 'GEMINI_API_KEY', 'ELEVENLABS_API_KEY', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
 
 function parseEnv(content) {
   const result = {}

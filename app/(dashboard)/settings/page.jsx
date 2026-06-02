@@ -160,7 +160,7 @@ export default function SettingsPage() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setSaved(true)
-      setValues({ YOUTUBE_API_KEY: '', ANTHROPIC_API_KEY: '', GEMINI_API_KEY: '', ELEVENLABS_API_KEY: '' })
+      setValues(Object.fromEntries(FIELDS.map(f => [f.key, ''])))
       const fresh = await fetch('/api/settings').then(r => r.json())
       setStatus(fresh)
     } catch (e) {
