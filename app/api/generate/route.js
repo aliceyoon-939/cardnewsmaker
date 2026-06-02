@@ -259,7 +259,7 @@ export async function POST(req) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
+      model: format === 'card' ? 'claude-haiku-4-5' : 'claude-sonnet-4-6',
       max_tokens: maxTok,
       // system 파라미터로 분리 → cache_control 으로 캐시 고정
       system: [{ type: 'text', text: systemText, cache_control: { type: 'ephemeral' } }],
