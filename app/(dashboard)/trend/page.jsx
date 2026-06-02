@@ -92,7 +92,6 @@ function TopicCard({ topic, artist, onScript }) {
           <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 2 }}>포맷 선택</div>
           <div style={{ display: 'flex', gap: 5 }}>
             <button className="btn"   style={{ fontSize: 11, padding: '6px 0', flex: 1 }} onClick={() => onScript(topic, 'short')}>숏폼</button>
-            <button className="btn-g" style={{ fontSize: 11, padding: '6px 0', flex: 1 }} onClick={() => onScript(topic, 'news')}>숏뉴스</button>
             <button className="btn-g" style={{ fontSize: 11, padding: '6px 0', flex: 1 }} onClick={() => onScript(topic, 'card')}>카드뉴스</button>
           </div>
           <button style={{ fontSize: 10, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }} onClick={() => setPicking(false)}>
@@ -454,7 +453,7 @@ export default function TrendPage() {
       reason: topic.reason, keywords: (topic.keywords || []).join(','),
       videoId: videoId || '',
     })
-    router.push(`${fmt === 'news' ? '/news' : fmt === 'card' ? '/card' : '/short'}?${params}`)
+    router.push(`${fmt === 'card' ? '/card' : '/short'}?${params}`)
   }
 
   function goNewsScript(item, fmt) {
