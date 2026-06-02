@@ -49,15 +49,26 @@ const KPOP_ARTISTS = [
   'gayeon','hyewon','yena','chaeyeon','miho','nako','hitomi',
 ]
 
+// 'official video' / 'music video' 제거 — 서양 아티스트도 동일하게 쓰므로 K-pop 판별에 부적합
 const KPOP_TITLE_KEYWORDS = [
-  ' mv',' m/v','official mv','official m/v','official video',
-  'music video','뮤직비디오','k-pop','kpop','케이팝',
+  ' mv',' m/v','official mv','official m/v',
+  '뮤직비디오','k-pop','kpop','케이팝',
   'performance video','choreography video','dance practice',
   'comeback','컴백','debut','데뷔',
 ]
 
 const EXCLUDE_ARTISTS = [
-  'hieuthuhai',
+  // 베트남 로컬 아티스트
+  'hieuthuhai','son tung','sontung','hoang thuy linh','den vau','jack j97',
+  'duc phuc','bich phuong','only c','mono','tlinh','wxrdie',
+  // 서양·글로벌 팝 (베트남 트렌딩에 자주 등장)
+  'shakira','ariana grande','ariana','taylor swift','ed sheeran',
+  'burna boy','burnaboy','tyga','post malone','billie eilish',
+  'the weeknd','weeknd','drake','dua lipa','dualipa',
+  'bruno mars','brunoMars','charlie puth','charlieputh',
+  'justin bieber','justinbieber','selena gomez','selenagomez',
+  'olivia rodrigo','oliviarodrigo','harry styles','harrystyles',
+  'adele','beyonce','rihanna','lady gaga','ladygaga',
 ]
 
 // ── 트로트 제외 키워드 ────────────────────────────────────
@@ -93,9 +104,12 @@ function isKpop(item) {
   // 3. 알려진 아티스트명
   if (KPOP_ARTISTS.some(a => title.includes(a))) return true
 
-  // 4. K-pop 관련 키워드 (MV 등) + 채널 설명에 korea/kpop
+  // 4. K-pop 전용 키워드 ('mv', 'dance practice' 등) + 채널/설명에 korea/kpop
+  //    'official video' / 'music video'는 제거됨 — 서양 팝에도 보편적으로 사용
   const hasMvKeyword = KPOP_TITLE_KEYWORDS.some(k => title.includes(k))
-  if (hasMvKeyword && (desc.includes('korea') || desc.includes('kpop') || desc.includes('k-pop'))) return true
+  const hasKpopSignal = desc.includes('korea') || desc.includes('kpop') || desc.includes('k-pop')
+                     || channel.includes('korea') || channel.includes('kpop')
+  if (hasMvKeyword && hasKpopSignal) return true
 
   return false
 }
