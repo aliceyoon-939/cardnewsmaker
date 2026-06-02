@@ -193,7 +193,7 @@ JSON만 반환 (코드블록 없이):
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5',
         max_tokens: 1200,
         messages: [{ role: 'user', content: prompt }],
       }),
