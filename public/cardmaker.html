@@ -81,7 +81,7 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 .btn-exp:hover{opacity:.88}
 
 /* ─── MID panel ─── */
-.pm{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-mid);min-width:280px}
+.pm{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-mid);min-width:280px}
 .pm-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .pm-lbl{font-size:10px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.08em}
 .cb{padding:2px 8px;background:rgba(190,242,100,0.14);color:var(--pink);border-radius:20px;font-size:9px;font-weight:700}
@@ -965,79 +965,8 @@ function renderEditor(){
   const ovBtns=_mkLayout(_olExp?OL:OL.slice(0,3));
 
   body.innerHTML=`
-<!-- ── 📤 출력 설정 (최상단) ── -->
-<div class="sec-hd sec-hd-first" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📤 출력 설정</div>
-<div class="fg">
-  <label class="fl">규격</label>
-  <div style="display:flex;flex-direction:column;gap:10px" id="rpRow">
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">카드뉴스</div>
-      <div class="fmt-row">
-        ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">플랫폼</div>
-      <div class="fmt-row">
-        ${[['cms','배너','5:3'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
-  </div>
-  ${!isOv?`<div style="margin-top:10px">
-    <div class="fl" style="margin-bottom:6px;font-size:9px">이미지 비율 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt)">${isSplit?'(분할 폭 기준)':'— 규격 변경 시 자동 설정'}</span></div>
-    <div class="ir-row" id="irRow">
-      ${IMG_RATIOS.map(ir=>{
-        const icoW=ir.ar>=1?16:Math.round(16*ir.ar);
-        const icoH=ir.ar<=1?14:Math.round(14/ir.ar);
-        const icon=`<svg width="${icoW}" height="${icoH}" viewBox="0 0 ${icoW} ${icoH}" fill="none"><rect x="0.5" y="0.5" width="${icoW-1}" height="${icoH-1}" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>`;
-        return `<button class="ir-btn ${c.imgRatio===ir.id?'on':''}" data-ir="${ir.id}">
-<div class="ir-icon">${icon}</div>
-<span class="ir-name">${ir.l}</span><span class="ir-dim">${ir.d}</span></button>`;
-      }).join('')}
-    </div>
-  </div>`:''}
-</div>
-
-<div class="fg">
-  <label class="fl">푸터 옵션</label>
-  <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
-    <button id="footerToggle" style="
-      display:flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:7px;
-      border:1.5px solid ${c.showFooter?'var(--pink)':'var(--stroke)'};
-      background:${c.showFooter?'rgba(190,242,100,0.08)':'transparent'};
-      color:${c.showFooter?'var(--pink)':'var(--ts)'};
-      font-family:var(--font);font-size:11px;font-weight:600;
-      cursor:pointer;transition:all .13s;width:100%">
-      <span style="width:32px;height:18px;border-radius:9px;flex-shrink:0;position:relative;background:${c.showFooter?'var(--pink)':'var(--stroke)'};transition:background .2s">
-        <span style="position:absolute;top:3px;left:${c.showFooter?'17':'3'}px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></span>
-      </span>
-      ${c.showFooter?'KPOP NOW · 표시됨':'푸터 숨김'}
-    </button>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:10px;font-weight:600;color:var(--ts)">푸터 위치</span>
-        <span style="font-size:10px;font-weight:700;color:var(--pink)" id="footerYPct">${Math.round((c.footerY??0.88)*100)}%</span>
-      </div>
-      <input type="range" class="ov-range" id="fFooterY" min="0" max="100" step="1" value="${Math.round((c.footerY??0.88)*100)}"/>
-      <span style="font-size:9px;color:var(--tt)">0% = 최상단 · 100% = 최하단</span>
-    </div>
-  </div>
-</div>
-
-<div class="fg">
-  <label class="fl">이미지 출처 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 우하단에 표시</span></label>
-  <input class="fi" id="fSource" value="${esc(gSource)}" placeholder="예) Image - YOUTUBE HYBE LABELS · AI 크롤링 시 자동 입력"/>
-</div>
-
 <!-- ── 📝 콘텐츠 ── -->
-<div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📝 콘텐츠</div>
+<div class="sec-hd sec-hd-first" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">📝 콘텐츠</div>
 <div class="fg">
   <label class="fl">제목</label>
   <input class="fi" id="fTi" value="${esc(c.title)}" placeholder="카드 제목을 입력하세요"/>
@@ -1045,6 +974,10 @@ function renderEditor(){
 <div class="fg">
   <label class="fl">본문</label>
   <textarea class="fta" id="fBo" placeholder="카드 본문 내용을 입력하세요...">${esc(c.body)}</textarea>
+</div>
+<div class="fg">
+  <label class="fl">이미지 출처 <span style="font-size:8.5px;font-weight:500;color:var(--tt);letter-spacing:.01em">· 전체 슬라이드 우하단에 표시</span></label>
+  <input class="fi" id="fSource" value="${esc(gSource)}" placeholder="예) Image - YOUTUBE HYBE LABELS · AI 크롤링 시 자동 입력"/>
 </div>
 
 <!-- ── 🖼 이미지 ── -->
@@ -1114,20 +1047,32 @@ ${gThumbnails.length>0?`
   </div>
 </div>`:''}
 
-${c.imgSrc?`
-<div class="fg">
-  <label class="fl">이미지 필터</label>
-  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
-    ${FILTER_LABELS.map(({f,l})=>`
-    <button onclick="setImgFilter('${f}')"
-      style="padding:5px 12px;font-size:10px;font-weight:600;border-radius:5px;font-family:var(--font);cursor:pointer;transition:all .13s;border:1.5px solid ${(c.imgFilter||'none')===f?'rgba(167,139,250,0.8)':'var(--stroke)'};background:${(c.imgFilter||'none')===f?'rgba(167,139,250,0.12)':'var(--bg-card-item)'};color:${(c.imgFilter||'none')===f?'rgba(167,139,250,1)':'var(--ts)'}">
-      ${l}
-    </button>`).join('')}
-  </div>
-</div>`:''}
-
 <!-- ── 🎨 디자인 ── -->
 <div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">🎨 디자인</div>
+
+<div class="fg">
+  <label class="fl">출력 비율</label>
+  <div style="display:flex;flex-direction:column;gap:10px" id="rpRow">
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">카드뉴스</div>
+      <div class="fmt-row">
+        ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1']].map(([id,name,dim])=>`
+        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
+          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">플랫폼</div>
+      <div class="fmt-row">
+        ${[['cms','배너','5:3'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
+        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
+          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="fg">
   <label class="fl">레이아웃</label>
@@ -1180,83 +1125,138 @@ ${c.imgSrc?`
   </div>
 </div>
 
-<!-- 고급 디자인 설정 토글 -->
-<button onclick="toggleExp('adv')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:6px 0;cursor:pointer;font-family:var(--font);width:100%;transition:color .13s;letter-spacing:.02em" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${_advDesignExp?'고급 디자인 접기 ▲':'고급 디자인 설정 ▼'}</button>
-<div style="display:${_advDesignExp?'flex':'none'};flex-direction:column;gap:14px;margin-top:2px">
-  <div class="lgrp og">
-    <div class="lgrp-hd"><span class="lgrp-badge o">오버레이형</span><span class="lgrp-desc">이미지 위에 텍스트가 겹치는 스타일</span></div>
-    <div class="lgrp-row" id="olPick">${ovBtns}</div>
-    ${_moreBtn('ol',_olExp)}
-  </div>
-  <div class="ov-box ${isOv?'':'dim'}" id="ovBox">
-    <div class="ov-hd">
-      <span class="ov-hd-lbl">오버레이 강도</span>
-      <span class="ov-pct" id="ovPct">${c.opacity}%</span>
+<!-- ── ⚙️ 고급 설정 ── -->
+<button onclick="toggleExp('adv')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:6px 0;cursor:pointer;font-family:var(--font);width:100%;transition:color .13s;letter-spacing:.02em" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${_advDesignExp?'⚙️ 고급 설정 접기 ▲':'⚙️ 고급 설정 ▾'}</button>
+<div style="display:${_advDesignExp?'flex':'none'};flex-direction:column;gap:14px;margin-top:8px">
+
+  ${!isOv?`<div class="fg" style="margin:0">
+    <div class="fl" style="margin-bottom:6px;font-size:11px;font-weight:600">이미지 비율 <span style="font-weight:400;font-size:9px;color:var(--tt)">${isSplit?'(분할 폭 기준)':'— 규격 변경 시 자동 설정'}</span></div>
+    <div class="ir-row" id="irRow">
+      ${IMG_RATIOS.map(ir=>{
+        const icoW=ir.ar>=1?16:Math.round(16*ir.ar);
+        const icoH=ir.ar<=1?14:Math.round(14/ir.ar);
+        const icon=`<svg width="${icoW}" height="${icoH}" viewBox="0 0 ${icoW} ${icoH}" fill="none"><rect x="0.5" y="0.5" width="${icoW-1}" height="${icoH-1}" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>`;
+        return `<button class="ir-btn ${c.imgRatio===ir.id?'on':''}" data-ir="${ir.id}">
+<div class="ir-icon">${icon}</div>
+<span class="ir-name">${ir.l}</span><span class="ir-dim">${ir.d}</span></button>`;
+      }).join('')}
     </div>
-    <input type="range" class="ov-range" id="fOv" min="10" max="92" step="2" value="${c.opacity}"/>
-    <div class="ov-hint">${isOv?'낮을수록 이미지가 더 선명하게 보입니다':'오버레이형 레이아웃을 선택하면 활성화됩니다'}</div>
-    ${isOv?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
-      <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">텍스트 위치</div>
-      <div style="display:flex;gap:5px" id="textPosPick">
-        ${[['top','상단'],['center','중앙'],['bottom','하단']].map(([v,l])=>`
-        <button data-pos="${v}"
-          style="flex:1;padding:7px 0;font-size:10px;font-weight:600;border-radius:6px;border:1.5px solid ${(c.textPos||'bottom')===v?'var(--pink)':'var(--stroke)'};background:${(c.textPos||'bottom')===v?'rgba(190,242,100,0.08)':'var(--bg-card-item)'};color:${(c.textPos||'bottom')===v?'var(--pink)':'var(--ts)'};font-family:var(--font);cursor:pointer;transition:all .13s">
-          ${l}
-        </button>`).join('')}
+  </div>`:''}
+
+  ${c.imgSrc?`<div class="fg" style="margin:0">
+    <label class="fl">이미지 필터</label>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
+      ${FILTER_LABELS.map(({f,l})=>`
+      <button onclick="setImgFilter('${f}')"
+        style="padding:5px 12px;font-size:10px;font-weight:600;border-radius:5px;font-family:var(--font);cursor:pointer;transition:all .13s;border:1.5px solid ${(c.imgFilter||'none')===f?'rgba(167,139,250,0.8)':'var(--stroke)'};background:${(c.imgFilter||'none')===f?'rgba(167,139,250,0.12)':'var(--bg-card-item)'};color:${(c.imgFilter||'none')===f?'rgba(167,139,250,1)':'var(--ts)'}">
+        ${l}
+      </button>`).join('')}
+    </div>
+  </div>`:''}
+
+  <div class="fg" style="margin:0">
+    <label class="fl">오버레이형 레이아웃</label>
+    <div class="lgrp og" style="margin-top:4px">
+      <div class="lgrp-hd"><span class="lgrp-badge o">오버레이형</span><span class="lgrp-desc">이미지 위에 텍스트가 겹치는 스타일</span></div>
+      <div class="lgrp-row" id="olPick">${ovBtns}</div>
+      ${_moreBtn('ol',_olExp)}
+    </div>
+    <div class="ov-box ${isOv?'':'dim'}" id="ovBox" style="margin-top:8px">
+      <div class="ov-hd">
+        <span class="ov-hd-lbl">오버레이 강도</span>
+        <span class="ov-pct" id="ovPct">${c.opacity}%</span>
       </div>
-    </div>`:''}
+      <input type="range" class="ov-range" id="fOv" min="10" max="92" step="2" value="${c.opacity}"/>
+      <div class="ov-hint">${isOv?'낮을수록 이미지가 더 선명하게 보입니다':'오버레이형 레이아웃을 선택하면 활성화됩니다'}</div>
+      ${isOv?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">텍스트 위치</div>
+        <div style="display:flex;gap:5px" id="textPosPick">
+          ${[['top','상단'],['center','중앙'],['bottom','하단']].map(([v,l])=>`
+          <button data-pos="${v}"
+            style="flex:1;padding:7px 0;font-size:10px;font-weight:600;border-radius:6px;border:1.5px solid ${(c.textPos||'bottom')===v?'var(--pink)':'var(--stroke)'};background:${(c.textPos||'bottom')===v?'rgba(190,242,100,0.08)':'var(--bg-card-item)'};color:${(c.textPos||'bottom')===v?'var(--pink)':'var(--ts)'};font-family:var(--font);cursor:pointer;transition:all .13s">
+            ${l}
+          </button>`).join('')}
+        </div>
+      </div>`:''}
+    </div>
   </div>
-</div>
 
-<!-- ── ✏️ 텍스트 설정 ── -->
-<div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">✏️ 텍스트 설정</div>
-<div class="fg">
-  <label class="fl">텍스트 크기 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt);font-size:9px">이미지가 클 때 자동 축소됨</span></label>
-  <div class="fsz-row">
-    <div class="fsz-item">
-      <span class="fsz-lbl">제목</span>
-      <input type="range" class="fsz-range" id="fTsz" min="8" max="60" step="1" value="${c.titleSize}"/>
-      <span class="fsz-val" id="fTszV">${c.titleSize}px</span>
-    </div>
-    <div class="fsz-item">
-      <span class="fsz-lbl">본문</span>
-      <input type="range" class="fsz-range" id="fBsz" min="6" max="32" step="1" value="${c.bodySize}"/>
-      <span class="fsz-val" id="fBszV">${c.bodySize}px</span>
+  <div class="fg" style="margin:0">
+    <label class="fl">텍스트 크기 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tt);font-size:9px">이미지가 클 때 자동 축소됨</span></label>
+    <div class="fsz-row">
+      <div class="fsz-item">
+        <span class="fsz-lbl">제목</span>
+        <input type="range" class="fsz-range" id="fTsz" min="8" max="60" step="1" value="${c.titleSize}"/>
+        <span class="fsz-val" id="fTszV">${c.titleSize}px</span>
+      </div>
+      <div class="fsz-item">
+        <span class="fsz-lbl">본문</span>
+        <input type="range" class="fsz-range" id="fBsz" min="6" max="32" step="1" value="${c.bodySize}"/>
+        <span class="fsz-val" id="fBszV">${c.bodySize}px</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="fg">
-  <label class="fl">텍스트 정렬</label>
-  <div style="display:flex;gap:5px" id="alignPick">
-    ${[
-      ['left',   '왼쪽', '<path d="M3 4h10M3 7h14M3 10h10M3 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'],
-      ['center', '중앙',  '<path d="M4 4h8M2 7h12M4 10h8M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'],
-      ['right',  '오른쪽','<path d="M3 4h10M1 7h14M3 10h10M1 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="scale(-1,1) translate(-16,0)"/>'],
-    ].map(([val,lbl,svgPath])=>`
-    <button class="align-btn ${(c.textAlign||'left')===val?'on':''}" data-align="${val}" title="${lbl}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border-radius:7px;border:1.5px solid ${(c.textAlign||'left')===val?'var(--pink)':'rgba(255,255,255,0.12)'};background:${(c.textAlign||'left')===val?'rgba(190,242,100,0.08)':'rgba(255,255,255,0.02)'};cursor:pointer;transition:all .13s">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:${(c.textAlign||'left')===val?'var(--pink)':'var(--ts)'};">${svgPath}</svg>
-      <span style="font-size:10px;font-weight:600;color:${(c.textAlign||'left')===val?'var(--pink)':'var(--ts)'};font-family:var(--font)">${lbl}</span>
-    </button>`).join('')}
+  <div class="fg" style="margin:0">
+    <label class="fl">텍스트 정렬</label>
+    <div style="display:flex;gap:5px" id="alignPick">
+      ${[
+        ['left',   '왼쪽', '<path d="M3 4h10M3 7h14M3 10h10M3 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'],
+        ['center', '중앙',  '<path d="M4 4h8M2 7h12M4 10h8M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'],
+        ['right',  '오른쪽','<path d="M3 4h10M1 7h14M3 10h10M1 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="scale(-1,1) translate(-16,0)"/>'],
+      ].map(([val,lbl,svgPath])=>`
+      <button class="align-btn ${(c.textAlign||'left')===val?'on':''}" data-align="${val}" title="${lbl}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border-radius:7px;border:1.5px solid ${(c.textAlign||'left')===val?'var(--pink)':'rgba(255,255,255,0.12)'};background:${(c.textAlign||'left')===val?'rgba(190,242,100,0.08)':'rgba(255,255,255,0.02)'};cursor:pointer;transition:all .13s">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:${(c.textAlign||'left')===val?'var(--pink)':'var(--ts)'};">${svgPath}</svg>
+        <span style="font-size:10px;font-weight:600;color:${(c.textAlign||'left')===val?'var(--pink)':'var(--ts)'};font-family:var(--font)">${lbl}</span>
+      </button>`).join('')}
+    </div>
   </div>
-</div>
 
-<div class="fg">
-  <label class="fl">텍스트 위치 조정</label>
-  <div id="textOffPanel" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:4px">
-    <div class="fsz-item">
-      <span class="fsz-lbl" style="width:36px;color:var(--ts)">제목</span>
-      <input type="range" class="fsz-range" id="fTitleOffY" min="-120" max="120" step="1" value="${c.titleOffsetY||0}"/>
-      <span class="fsz-val" id="fTitleOffYV">${c.titleOffsetY||0}px</span>
-      <button data-reset="fTitleOffY" style="margin-left:4px;padding:2px 7px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-input);color:var(--ts);font-size:9px;font-family:var(--font);cursor:pointer">↺</button>
-    </div>
-    <div class="fsz-item">
-      <span class="fsz-lbl" style="width:36px;color:var(--ts)">본문</span>
-      <input type="range" class="fsz-range" id="fBodyOffY" min="-120" max="120" step="1" value="${c.bodyOffsetY||0}"/>
-      <span class="fsz-val" id="fBodyOffYV">${c.bodyOffsetY||0}px</span>
-      <button data-reset="fBodyOffY" style="margin-left:4px;padding:2px 7px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-input);color:var(--ts);font-size:9px;font-family:var(--font);cursor:pointer">↺</button>
+  <div class="fg" style="margin:0">
+    <label class="fl">텍스트 위치 조정</label>
+    <div id="textOffPanel" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:4px">
+      <div class="fsz-item">
+        <span class="fsz-lbl" style="width:36px;color:var(--ts)">제목</span>
+        <input type="range" class="fsz-range" id="fTitleOffY" min="-120" max="120" step="1" value="${c.titleOffsetY||0}"/>
+        <span class="fsz-val" id="fTitleOffYV">${c.titleOffsetY||0}px</span>
+        <button data-reset="fTitleOffY" style="margin-left:4px;padding:2px 7px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-input);color:var(--ts);font-size:9px;font-family:var(--font);cursor:pointer">↺</button>
+      </div>
+      <div class="fsz-item">
+        <span class="fsz-lbl" style="width:36px;color:var(--ts)">본문</span>
+        <input type="range" class="fsz-range" id="fBodyOffY" min="-120" max="120" step="1" value="${c.bodyOffsetY||0}"/>
+        <span class="fsz-val" id="fBodyOffYV">${c.bodyOffsetY||0}px</span>
+        <button data-reset="fBodyOffY" style="margin-left:4px;padding:2px 7px;border-radius:4px;border:1px solid var(--stroke);background:var(--bg-input);color:var(--ts);font-size:9px;font-family:var(--font);cursor:pointer">↺</button>
+      </div>
     </div>
   </div>
+
+  <div class="fg" style="margin:0">
+    <label class="fl">푸터 옵션</label>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
+      <button id="footerToggle" style="
+        display:flex;align-items:center;gap:8px;
+        padding:8px 12px;border-radius:7px;
+        border:1.5px solid ${c.showFooter?'var(--pink)':'var(--stroke)'};
+        background:${c.showFooter?'rgba(190,242,100,0.08)':'transparent'};
+        color:${c.showFooter?'var(--pink)':'var(--ts)'};
+        font-family:var(--font);font-size:11px;font-weight:600;
+        cursor:pointer;transition:all .13s;width:100%">
+        <span style="width:32px;height:18px;border-radius:9px;flex-shrink:0;position:relative;background:${c.showFooter?'var(--pink)':'var(--stroke)'};transition:background .2s">
+          <span style="position:absolute;top:3px;left:${c.showFooter?'17':'3'}px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></span>
+        </span>
+        ${c.showFooter?'KPOP NOW · 표시됨':'푸터 숨김'}
+      </button>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:10px;font-weight:600;color:var(--ts)">푸터 위치</span>
+          <span style="font-size:10px;font-weight:700;color:var(--pink)" id="footerYPct">${Math.round((c.footerY??0.88)*100)}%</span>
+        </div>
+        <input type="range" class="ov-range" id="fFooterY" min="0" max="100" step="1" value="${Math.round((c.footerY??0.88)*100)}"/>
+        <span style="font-size:9px;color:var(--tt)">0% = 최상단 · 100% = 최하단</span>
+      </div>
+    </div>
+  </div>
+
 </div>`;
 
   requestAnimationFrame(() => { body.scrollTop = savedScroll; });
@@ -2320,7 +2320,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
     if(!dragging)return;
     // resizer is between .pm and .pr; dragging right → pr wider
     const delta=e.clientX-startX;
-    applyWidth(startW-delta); // pr is on the right, so leftward drag = wider pr
+    applyWidth(startW-delta); // resizer follows mouse: drag right → pm wider, drag left → pr wider
     rescaleCard();
   });
 
