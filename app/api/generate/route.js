@@ -216,9 +216,29 @@ JSON만 반환 (코드블록 없이):
 }
 
 function promptCard(ctx) {
+  // ctx 안의 AI 분석 컨텍스트에서 topic/hook/reason 추출 (promptShort와 동일 패턴)
+  const topicMatch  = ctx.match(/주제:\s*(.+)/)
+  const hookMatch   = ctx.match(/후킹 레퍼런스:\s*(.+)/)
+  const reasonMatch = ctx.match(/분석 근거:\s*(.+)/)
+  const topic  = topicMatch?.[1]?.trim()  || ''
+  const hook   = hookMatch?.[1]?.trim()   || ''
+  const reason = reasonMatch?.[1]?.trim() || ''
+
+  const angleBlock = (topic || hook || reason) ? `
+━━━ 카드뉴스 핵심 각도 (반드시 준수) ━━━
+${topic  ? `주제: ${topic}`  : ''}
+${hook   ? `후킹 포인트: ${hook}`   : ''}
+${reason ? `선택 이유: ${reason}` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[중요] 위 주제/각도를 카드뉴스 전체의 중심축으로 삼으세요.
+커버 제목부터 각 슬라이드 내용까지 이 각도에서 일관되게 전개하세요.
+단순 이벤트 안내(출시일, 조회수 나열)가 아닌, 위 주제가 왜 흥미로운지 팬 시선으로 전달하세요.
+` : ''
+
   return {
     systemText: SYSTEM_CARD,
-    userContent: `Source data:
+    userContent: `${angleBlock}Source data:
 ${ctx}
 
 Return ONLY valid JSON (no code blocks).
