@@ -366,7 +366,7 @@ JSON만 반환 (코드블록 없이):
 {"time":"${cur.time}","ko":"한국어 나레이션","vi":"베트남어 나레이션","visual":"화면 설명"}`
 
     try {
-      const res  = await fetch('/api/claude', {
+      const res  = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
