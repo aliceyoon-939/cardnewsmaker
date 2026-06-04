@@ -55,21 +55,6 @@ export default function Sidebar() {
         )
       })}
 
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--tx3)', letterSpacing: '.1em', padding: '0 6px', marginTop: 14, marginBottom: 6 }}>
-        SETTINGS
-      </div>
-      <button
-        className={`sb-btn${pathname === '/settings' ? ' on' : ''}`}
-        onClick={() => navigate('/settings')}
-        aria-label="API 키 관리"
-      >
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="10" cy="10" r="2.5"/>
-          <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M15.78 4.22l-1.42 1.42M5.64 14.36l-1.42 1.42"/>
-        </svg>
-        <span className="sb-tip">API 키 관리</span>
-      </button>
-
     </nav>
   )
 }
