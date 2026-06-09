@@ -241,7 +241,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
                 textDecoration: 'none', display: 'flex', alignItems: 'center',
               }}
             >
-              YT ↗
+              YouTube ↗
             </a>
           </div>
 
