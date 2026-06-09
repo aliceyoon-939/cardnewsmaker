@@ -71,6 +71,20 @@ const EXCLUDE_ARTISTS = [
   'adele','beyonce','rihanna','lady gaga','ladygaga',
 ]
 
+// K-pop 비관련 채널 (리액션 유튜버, 서양 엔터테이너 등)
+const EXCLUDE_CHANNELS = [
+  'ishowspeed','speed','ishow speed',
+  'mr beast','mrbeast',
+  'ninja','tfue','pokimane',
+]
+
+// K-pop 비관련 영상 패턴 (리액션, 챌린지 등)
+const NON_KPOP_PATTERNS = [
+  'reaction to','reacting to','reacts to',
+  'first time hearing','first time watching',
+  'responds to','watching kpop',
+]
+
 // ── 트로트 제외 키워드 ────────────────────────────────────
 const TROT_KEYWORDS = [
   '트로트','trot','미스터트롯','미스터 트롯','미스트롯','미스 트롯',
@@ -87,6 +101,12 @@ function isKpop(item) {
   // 0-1. 제외 아티스트
   const rawLower = (item.snippet.title || '').toLowerCase()
   if (EXCLUDE_ARTISTS.some(a => rawLower.includes(a))) return false
+
+  // 0-3. 제외 채널 (리액션 유튜버 등)
+  if (EXCLUDE_CHANNELS.some(c => channel.includes(c))) return false
+
+  // 0-4. 리액션/챌린지 영상 패턴 제외
+  if (NON_KPOP_PATTERNS.some(p => title.includes(p))) return false
 
   // 0-2. 트로트 키워드 제외 (제목·채널명 모두 체크)
   if (TROT_KEYWORDS.some(k => title.includes(k) || channel.includes(k))) return false
