@@ -446,7 +446,7 @@ function CardInner() {
 
         {/* 펼쳐진 입력 영역 */}
         {crawlOpen && (
-          <div style={{ padding: '0 16px 16px', background: 'var(--s2)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ padding: '0 16px 16px', background: 'var(--s2)', display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 800 }}>
 
             {/* URL 입력 + 버튼 */}
             <div style={{ display: 'flex', gap: 8 }}>
