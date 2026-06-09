@@ -211,7 +211,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
           padding: '10px 12px',
         }}>
           {/* 액션 버튼 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
             <button
               onClick={onAnalyze}
               disabled={anl?.loading}
@@ -224,6 +224,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
                 cursor: anl?.loading ? 'not-allowed' : 'pointer',
                 opacity: anl?.loading ? .7 : 1,
                 transition: 'all .2s',
+                whiteSpace: 'nowrap',
               }}
             >
               {anl?.loading ? '⏳ 분석 중...' : anl?.data ? '✓ 분석 완료' : '🔍 컨텐츠 분석'}
