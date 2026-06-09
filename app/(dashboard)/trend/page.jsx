@@ -216,7 +216,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
               onClick={onAnalyze}
               disabled={anl?.loading}
               style={{
-                fontSize: 11, padding: '8px 14px', fontWeight: 700,
+                flex: 1, fontSize: 11, padding: '8px 0', fontWeight: 700,
                 background: anl?.loading ? 'rgba(190,242,100,.4)' : anl?.data ? 'rgba(190,242,100,.15)' : 'var(--lime)',
                 color: anl?.data ? 'var(--lime)' : '#000',
                 border: anl?.data ? '1px solid rgba(190,242,100,.3)' : 'none',
@@ -224,21 +224,19 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
                 cursor: anl?.loading ? 'not-allowed' : 'pointer',
                 opacity: anl?.loading ? .7 : 1,
                 transition: 'all .2s',
-                whiteSpace: 'nowrap',
               }}
             >
-              {anl?.loading ? '⏳ 분석 중...' : anl?.data ? '✓ 분석 완료' : '🔍 컨텐츠 분석'}
+              {anl?.loading ? '분석 중...' : anl?.data ? '분석 완료' : '컨텐츠 분석'}
             </button>
-            <button className="btn-g" style={{ fontSize: 11, padding: '8px 14px' }} onClick={onShort}>숏폼</button>
-            <button className="btn-g" style={{ fontSize: 11, padding: '8px 14px' }} onClick={onCard}>카드뉴스</button>
+            <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onShort}>숏폼 제작</button>
+            <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onCard}>카드뉴스 제작</button>
             <a
               href={`https://www.youtube.com/watch?v=${item.videoId}`}
               target="_blank" rel="noopener noreferrer"
+              className="btn-g"
               style={{
-                fontSize: 11, padding: '8px 12px',
-                background: 'var(--s3)', border: '1px solid var(--b1)',
-                borderRadius: 'var(--r-sm)', color: 'var(--tx3)',
-                textDecoration: 'none', display: 'flex', alignItems: 'center',
+                flex: 1, fontSize: 11, padding: '8px 0',
+                textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
               YouTube ↗
