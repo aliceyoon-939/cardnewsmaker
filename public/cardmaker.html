@@ -1511,10 +1511,10 @@ ${gThumbnails.length>0?`
   });
 
   /* font — active 클래스만 교체하고 미리보기만 갱신 */
-  document.getElementById('fontPick').querySelectorAll('.font-btn')
+  document.getElementById('fontPick').querySelectorAll('.font-list-item')
     .forEach(b=>b.addEventListener('click',()=>{
       cards[ai].font=b.dataset.f;
-      document.getElementById('fontPick').querySelectorAll('.font-btn')
+      document.getElementById('fontPick').querySelectorAll('.font-list-item')
         .forEach(btn=>btn.classList.toggle('on',btn.dataset.f===b.dataset.f));
       _pvSig=null;renderPreview();
     }));
