@@ -116,10 +116,10 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
         onClick={onToggle}
         style={{
           display: 'grid',
-          gridTemplateColumns: '32px 64px 1fr 72px 72px 58px',
+          gridTemplateColumns: '32px 96px 1fr 72px 72px 58px',
           gap: 8,
           alignItems: 'center',
-          padding: '7px 10px',
+          padding: '6px 10px',
           cursor: 'pointer',
           background: !isTrend ? 'rgba(45,212,191,.025)' : 'var(--s1)',
           border: `1px solid ${isOpen ? 'rgba(190,242,100,.22)' : 'var(--b1)'}`,
@@ -145,7 +145,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
         <img
           src={item.thumbnail}
           alt=""
-          style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 3, background: 'var(--s3)', display: 'block' }}
+          style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 4, background: 'var(--s3)', display: 'block' }}
         />
 
         {/* 곡명 + 아티스트 */}
@@ -211,33 +211,36 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
           padding: '10px 12px',
         }}>
           {/* 액션 버튼 */}
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 6 }}>
             <button
               onClick={onAnalyze}
               disabled={anl?.loading}
               style={{
-                flex: 1, fontSize: 11, padding: '7px 12px', fontWeight: 700,
-                background: anl?.loading ? 'rgba(190,242,100,.4)' : 'var(--lime)',
-                color: '#000', border: 'none', borderRadius: 'var(--r-sm)',
+                fontSize: 11, padding: '8px 14px', fontWeight: 700,
+                background: anl?.loading ? 'rgba(190,242,100,.4)' : anl?.data ? 'rgba(190,242,100,.15)' : 'var(--lime)',
+                color: anl?.data ? 'var(--lime)' : '#000',
+                border: anl?.data ? '1px solid rgba(190,242,100,.3)' : 'none',
+                borderRadius: 'var(--r-sm)',
                 cursor: anl?.loading ? 'not-allowed' : 'pointer',
                 opacity: anl?.loading ? .7 : 1,
+                transition: 'all .2s',
               }}
             >
-              {anl?.loading ? '분석 중...' : anl?.data ? '분석 완료' : '컨텐츠 분석'}
+              {anl?.loading ? '⏳ 분석 중...' : anl?.data ? '✓ 분석 완료' : '🔍 컨텐츠 분석'}
             </button>
-            <button className="btn-g" style={{ fontSize: 11, padding: '7px 12px' }} onClick={onShort}>숏폼</button>
-            <button className="btn-g" style={{ fontSize: 11, padding: '7px 12px' }} onClick={onCard}>카드뉴스</button>
+            <button className="btn-g" style={{ fontSize: 11, padding: '8px 14px' }} onClick={onShort}>숏폼</button>
+            <button className="btn-g" style={{ fontSize: 11, padding: '8px 14px' }} onClick={onCard}>카드뉴스</button>
             <a
               href={`https://www.youtube.com/watch?v=${item.videoId}`}
               target="_blank" rel="noopener noreferrer"
               style={{
-                fontSize: 11, padding: '7px 10px',
+                fontSize: 11, padding: '8px 12px',
                 background: 'var(--s3)', border: '1px solid var(--b1)',
                 borderRadius: 'var(--r-sm)', color: 'var(--tx3)',
                 textDecoration: 'none', display: 'flex', alignItems: 'center',
               }}
             >
-              YT
+              YT ↗
             </a>
           </div>
 
@@ -464,7 +467,7 @@ export default function TrendPage() {
   }
 
   /* ── Render ────────────────────────────────────────────── */
-  const COLS = '32px 64px 1fr 72px 72px 58px'
+  const COLS = '32px 96px 1fr 72px 72px 58px'
 
   return (
     <>
@@ -495,12 +498,13 @@ export default function TrendPage() {
               key={key}
               onClick={() => setFilter(key)}
               style={{
-                padding: '4px 12px', borderRadius: 20,
+                padding: '5px 14px', borderRadius: 20,
                 border: active ? '1.5px solid var(--purple)' : '1px solid var(--b1)',
-                background: active ? 'rgba(167,139,250,.12)' : 'transparent',
-                color: active ? 'var(--purple)' : 'var(--tx3)',
-                fontSize: 11, fontWeight: active ? 600 : 400, cursor: 'pointer',
+                background: active ? 'rgba(167,139,250,.22)' : 'rgba(255,255,255,.03)',
+                color: active ? '#d8b4fe' : 'var(--tx3)',
+                fontSize: 11, fontWeight: active ? 700 : 400, cursor: 'pointer',
                 transition: 'all .15s',
+                boxShadow: active ? '0 0 0 1px rgba(167,139,250,.3)' : 'none',
               }}
             >
               {key}
@@ -544,7 +548,7 @@ export default function TrendPage() {
                   borderRadius: 'var(--r-sm)', alignItems: 'center', opacity: 1 - i * 0.08,
                 }}>
                   <div style={{ width: 20, height: 13, borderRadius: 3, background: 'var(--s3)', animation: 'pulse 1.4s ease-in-out infinite', margin: 'auto' }} />
-                  <div style={{ width: 64, height: 40, borderRadius: 3, background: 'var(--s3)', animation: 'pulse 1.4s ease-in-out infinite' }} />
+                  <div style={{ width: 96, height: 60, borderRadius: 4, background: 'var(--s3)', animation: 'pulse 1.4s ease-in-out infinite' }} />
                   <div>
                     <div style={{ height: 12, borderRadius: 3, background: 'var(--s3)', width: `${[75,60,80,65,70,55,72,68][i%8]}%`, animation: 'pulse 1.4s ease-in-out infinite', marginBottom: 5 }} />
                     <div style={{ height: 9,  borderRadius: 3, background: 'var(--s3)', width: '35%', animation: 'pulse 1.4s ease-in-out infinite' }} />
@@ -604,18 +608,31 @@ export default function TrendPage() {
         <div style={{ position: 'sticky', top: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           {/* K-pop 뉴스 */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx2)', letterSpacing: '-.1px' }}>K-pop 뉴스</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 9, color: 'var(--tx3)' }}>Soompi</span>
-                <button
-                  onClick={fetchNews}
-                  style={{ fontSize: 10, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px' }}
-                >
-                  ↻
-                </button>
+          <div style={{
+            background: 'var(--s1)',
+            border: '1px solid var(--b1)',
+            borderRadius: 'var(--r)',
+            padding: '12px 12px 10px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx1)', letterSpacing: '-.2px' }}>K-pop 뉴스</span>
+                <span style={{
+                  fontSize: 9, padding: '1px 6px', borderRadius: 10,
+                  background: 'rgba(167,139,250,.12)', color: 'var(--purple)', fontWeight: 600,
+                }}>Soompi</span>
               </div>
+              <button
+                onClick={fetchNews}
+                style={{
+                  fontSize: 12, color: 'var(--tx3)', background: 'none', border: 'none',
+                  cursor: 'pointer', padding: '2px 6px', borderRadius: 4,
+                  transition: 'color .15s',
+                }}
+                title="뉴스 새로고침"
+              >
+                ↻
+              </button>
             </div>
 
             {newsLoading && (
@@ -648,7 +665,7 @@ export default function TrendPage() {
                 ))}
               </div>
             )}
-          </div>
+          </div>{/* /K-pop 뉴스 패널 */}
         </div>
       </div>
     </>
