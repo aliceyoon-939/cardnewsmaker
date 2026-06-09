@@ -228,8 +228,8 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
             >
               {anl?.loading ? '분석 중...' : anl?.data ? '분석 완료' : '컨텐츠 분석'}
             </button>
-            <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onShort}>숏폼 제작</button>
             <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onCard}>카드뉴스 제작</button>
+            <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onShort}>숏폼 제작</button>
             <a
               href={`https://www.youtube.com/watch?v=${item.videoId}`}
               target="_blank" rel="noopener noreferrer"
