@@ -2271,11 +2271,11 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   const pr=document.getElementById('prPanel');
   let dragging=false,startX=0,startW=0;
 
-  pr.style.width='600px';
+  pr.style.width='720px';
   pr.style.flexShrink='0';
 
   function applyWidth(w){
-    pr.style.width=Math.max(240,Math.min(700,w))+'px';
+    pr.style.width=Math.max(240,Math.min(900,w))+'px';
   }
 
   /* Only rescale the existing card element during drag — no DOM rebuild */
