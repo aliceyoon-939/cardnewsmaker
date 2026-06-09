@@ -91,7 +91,7 @@ function TopicCard({ topic, artist, onScript }) {
         <div style={{ borderTop: '1px solid var(--b1)', paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
           <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 2 }}>포맷 선택</div>
           <div style={{ display: 'flex', gap: 5 }}>
-            <button className="btn"   style={{ fontSize: 11, padding: '6px 0', flex: 1 }} onClick={() => onScript(topic, 'short')}>숏폼</button>
+            <button disabled style={{ fontSize: 11, padding: '6px 0', flex: 1, borderRadius: 'var(--r-sm)', background: 'var(--s3)', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'not-allowed', opacity: .45 }}>숏폼</button>
             <button className="btn-g" style={{ fontSize: 11, padding: '6px 0', flex: 1 }} onClick={() => onScript(topic, 'card')}>카드뉴스</button>
           </div>
           <button style={{ fontSize: 10, color: 'var(--tx3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }} onClick={() => setPicking(false)}>
@@ -229,7 +229,7 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
               {anl?.loading ? '분석 중...' : anl?.data ? '분석 완료' : '컨텐츠 분석'}
             </button>
             <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onCard}>카드뉴스 제작</button>
-            <button className="btn-g" style={{ flex: 1, fontSize: 11, padding: '8px 0' }} onClick={onShort}>숏폼 제작</button>
+            <button disabled style={{ flex: 1, fontSize: 11, padding: '8px 0', borderRadius: 'var(--r-sm)', background: 'var(--s3)', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'not-allowed', opacity: .45 }}>숏폼 제작</button>
             <a
               href={`https://www.youtube.com/watch?v=${item.videoId}`}
               target="_blank" rel="noopener noreferrer"
@@ -327,7 +327,7 @@ function NewsItem({ item, idx, isOpen, onToggle, onAction }) {
           borderTop: 'none', borderRadius: '0 0 var(--r-sm) var(--r-sm)',
           padding: '7px 10px', display: 'flex', gap: 4,
         }}>
-          <button className="btn"   style={{ fontSize: 10, padding: '5px 0', flex: 1, fontWeight: 700 }} onClick={() => onAction(item, 'short')}>숏폼</button>
+          <button disabled style={{ fontSize: 10, padding: '5px 0', flex: 1, borderRadius: 'var(--r-sm)', background: 'var(--s3)', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'not-allowed', opacity: .45 }}>숏폼</button>
           <button className="btn-g" style={{ fontSize: 10, padding: '5px 0', flex: 1 }} onClick={() => onAction(item, 'card')}>카드뉴스</button>
           <a
             href={item.link} target="_blank" rel="noopener noreferrer"
