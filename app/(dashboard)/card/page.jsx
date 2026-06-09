@@ -407,7 +407,7 @@ function CardInner() {
       if (ragData?.video)    parts.push(`YouTube ${(ragData.video.viewCount/1e6).toFixed(1)}M뷰`)
       if (ragData?.captions) parts.push(`자막 (${ragData.captions.lang.toUpperCase()})`)
       if (ragData?.news?.length) parts.push(`뉴스 ${ragData.news.length}건`)
-      return { label: `✓ 팩트 기반 자동 생성 완료 · ${parts.join(' · ')}`, color: 'var(--lime)' }
+      return { label: `✓ 슬라이드 자동 생성 완료 · ${parts.join(' · ')}`, color: 'var(--lime)' }
     }
     if (status === 'error')   return { label: `⚠️ ${error}`, color: 'var(--pink)' }
     return null
@@ -503,11 +503,6 @@ function CardInner() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {isLoading && <div className="spin" style={{ width: 12, height: 12, borderWidth: 2 }} />}
             <span style={{ fontSize: 11, color: bar.color, fontWeight: 600 }}>{bar.label}</span>
-            {status === 'done' && (
-              <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: 'rgba(167,139,250,.12)', color: 'var(--purple)', fontWeight: 600 }}>
-                🔒 저작권 안전
-              </span>
-            )}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {status === 'done' && (
