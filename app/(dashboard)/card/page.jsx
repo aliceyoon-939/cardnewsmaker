@@ -480,7 +480,7 @@ function CardInner() {
               >
                 {crawlLoading
                   ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />수집 중</>
-                  : '📰 크롤링 시작'}
+                  : '크롤링 시작'}
               </button>
             </div>
 
@@ -494,19 +494,19 @@ function CardInner() {
             {/* 수집 결과 */}
             {crawlData && (
               <div style={{
-                display: 'flex', gap: 10, alignItems: 'flex-start',
+                display: 'flex', gap: 10, alignItems: 'center',
                 background: 'var(--s1)', border: '1px solid var(--b1)',
-                borderRadius: 'var(--r-sm)', padding: '10px 12px',
+                borderRadius: 'var(--r-sm)', padding: '8px 10px',
               }}>
                 {crawlData.image && (
-                  <img src={crawlData.image} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                  <img src={crawlData.image} alt="" style={{ width: 52, height: 36, objectFit: 'cover', borderRadius: 3, flexShrink: 0 }} />
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx1)', marginBottom: 2,
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx1)',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {crawlData.title}
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, color: 'var(--tx3)', marginTop: 2 }}>
                     {crawlData.site} · {crawlData.text.length.toLocaleString()}자 추출
                     {crawlData.images?.length > 0 && (
                       <span style={{ marginLeft: 6, color: 'var(--lime)', fontWeight: 700 }}>
@@ -514,17 +514,17 @@ function CardInner() {
                       </span>
                     )}
                   </div>
-                  <button
-                    className="btn"
-                    style={{ fontSize: 11, padding: '6px 16px', fontWeight: 700, width: '100%' }}
-                    onClick={() => { generateFromCrawl(); setCrawlOpen(false) }}
-                    disabled={isLoading}
-                  >
-                    {isLoading
-                      ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />생성 중</>
-                      : '🎨 카드뉴스로 만들기'}
-                  </button>
                 </div>
+                <button
+                  className="btn"
+                  style={{ fontSize: 11, padding: '7px 14px', fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap' }}
+                  onClick={() => { generateFromCrawl(); setCrawlOpen(false) }}
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />생성 중</>
+                    : '카드뉴스로 만들기'}
+                </button>
               </div>
             )}
           </div>
