@@ -5,10 +5,10 @@ import { useSave } from '@/contexts/SaveContext'
 const workspaceItems = [
   { id: 'trend',   path: '/trend',   label: '트렌드서치',
     svg: <svg viewBox="0 0 20 20"><path d="M3 14l5-5 3.5 3.5L17 5"/></svg> },
+  { id: 'card',    path: '/card',    label: '카드뉴스',
+    svg: <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="10" rx="1.5"/><rect x="11" y="2" width="7" height="10" rx="1.5"/><rect x="2" y="14" width="16" height="4" rx="1.5"/></svg> },
   { id: 'short',   path: '/short',   label: '숏폼', disabled: true,
     svg: <svg viewBox="0 0 20 20"><rect x="5" y="2" width="10" height="16" rx="2"/><path d="M8.5 8l4 2.5-4 2.5V8z"/></svg> },
-{ id: 'card',    path: '/card',    label: '카드뉴스',
-    svg: <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="10" rx="1.5"/><rect x="11" y="2" width="7" height="10" rx="1.5"/><rect x="2" y="14" width="16" height="4" rx="1.5"/></svg> },
   { id: 'history', path: '/history', label: '히스토리',
     svg: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg> },
 ]
