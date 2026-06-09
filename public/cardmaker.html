@@ -1052,25 +1052,11 @@ ${gThumbnails.length>0?`
 
 <div class="fg">
   <label class="fl">출력 비율</label>
-  <div style="display:flex;flex-direction:column;gap:10px" id="rpRow">
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">카드뉴스</div>
-      <div class="fmt-row">
-        ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">플랫폼</div>
-      <div class="fmt-row">
-        ${[['cms','배너','5:3'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
-        <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
-          <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
-        </button>`).join('')}
-      </div>
-    </div>
+  <div class="fmt-row" id="rpRow">
+    ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
+    <button class="fmt-chip ${c.ratio===id?'on':''}" data-r="${id}">
+      <span class="fmt-chip-name">${name}</span><span class="fmt-chip-dim">${dim}</span>
+    </button>`).join('')}
   </div>
 </div>
 
