@@ -476,7 +476,10 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
       <div class="save-split" id="saveSplit">
         <button class="save-main" id="btnSavePng">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="#09090b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          PNG 저장
+          <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.2">
+            <span>PNG 저장</span>
+            <span style="font-size:9px;font-weight:500;opacity:.7">현재 카드 1장</span>
+          </span>
         </button>
         <button class="save-arrow" id="btnSaveArrow" title="다른 형식으로 저장">▾</button>
         <div class="save-drop" id="saveDrop">
@@ -486,13 +489,16 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
           </div>
         </div>
       </div>
-      <button class="save-all-btn" id="btnSaveAll" title="전체 카드 ZIP 다운로드 + Cloudinary URL 생성">
+      <button class="save-all-btn" id="btnSaveAll" title="전체 카드 ZIP 다운로드 + 공유 링크 생성">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 7v3a1 1 0 001 1h8a1 1 0 001-1V7M6 1v6M3 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        전체 저장
+        <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.2">
+          <span>전체 저장</span>
+          <span id="saveAllSub" style="font-size:9px;font-weight:500;opacity:.7">ZIP · <span id="saveAllCount">0</span>장</span>
+        </span>
       </button>
     </div>
     <div class="pr-copy-row" id="imgUrlRow">
-      <span class="pr-copy-url" id="imgUrlTxt" style="color:var(--tt)">PNG 저장 후 URL이 생성됩니다</span>
+      <span class="pr-copy-url" id="imgUrlTxt" style="color:var(--tt)">↑ 전체 저장 후 공유 링크가 생성됩니다</span>
       <button class="pr-copy-btn" id="btnCopyUrl" disabled style="opacity:.4">복사</button>
     </div>
     <div class="batch-url-wrap" id="batchUrlWrap">
@@ -1836,8 +1842,9 @@ function shrinkToFit(area){
   }
 }
 
-function renderAll(){renderList();renderEditor();renderPreview();updateNav()}
+function renderAll(){renderList();renderEditor();renderPreview();updateNav();updateSaveAllCount()}
 function updateNav(){document.getElementById('navP').disabled=ai<=0;document.getElementById('navN').disabled=ai>=cards.length-1}
+function updateSaveAllCount(){const el=document.getElementById('saveAllCount');if(el)el.textContent=cards.length}
 
 /* ══ GLOBAL EVENTS ══ */
 document.getElementById('navP').addEventListener('click',()=>{if(ai>0){ai--;renderAll()}});
