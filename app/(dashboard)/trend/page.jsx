@@ -327,18 +327,17 @@ function NewsItem({ item, idx, isOpen, onToggle, onAction }) {
           borderTop: 'none', borderRadius: '0 0 var(--r-sm) var(--r-sm)',
           padding: '7px 10px', display: 'flex', gap: 4,
         }}>
-          <button disabled style={{ fontSize: 10, padding: '5px 0', flex: 1, borderRadius: 'var(--r-sm)', background: 'var(--s3)', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'not-allowed', opacity: .45 }}>숏폼</button>
           <button className="btn-g" style={{ fontSize: 10, padding: '5px 0', flex: 1 }} onClick={() => onAction(item, 'card')}>카드뉴스</button>
+          <button disabled style={{ fontSize: 10, padding: '5px 0', flex: 1, borderRadius: 'var(--r-sm)', background: 'var(--s3)', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'not-allowed', opacity: .45 }}>숏폼</button>
           <a
             href={item.link} target="_blank" rel="noopener noreferrer"
+            className="btn-g"
             style={{
-              fontSize: 10, padding: '5px 8px',
-              background: 'var(--s3)', border: '1px solid var(--b1)',
-              borderRadius: 'var(--r-sm)', color: 'var(--tx3)',
+              fontSize: 10, padding: '5px 10px',
               textDecoration: 'none', display: 'flex', alignItems: 'center',
             }}
           >
-            원문
+            원문 ↗
           </a>
         </div>
       )}
