@@ -199,7 +199,7 @@ function CardInner() {
   const [crawlLoading, setCrawlLoading] = useState(false)
   const [crawlData,    setCrawlData]    = useState(null) // { title, description, image, site, text, url }
   const [crawlError,   setCrawlError]   = useState('')
-  const [crawlOpen,    setCrawlOpen]    = useState(true)
+  const [crawlOpen,    setCrawlOpen]    = useState(!hasContext)
 
   async function doCrawl() {
     if (!crawlUrl.trim()) return
