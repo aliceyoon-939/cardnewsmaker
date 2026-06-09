@@ -341,7 +341,7 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 @keyframes cIn{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:none}}
 .cn{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.06em;margin-bottom:8px;width:fit-content}
 .cn-s{background:var(--_cnum);color:var(--_cnumt)}
-.cn-g{background:rgba(255,255,255,0.13);color:rgba(255,255,255,0.92);backdrop-filter:blur(6px)}
+.cn-g{background:rgba(255,255,255,0.13);color:rgba(255,255,255,0.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .ctag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
 .ctag-a{color:var(--_c1)}
 .ctag-l{color:rgba(255,255,255,0.65)}
@@ -358,7 +358,7 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 .cdot.a{background:var(--_c1)}
 
 /* modal */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:100;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .mb{background:var(--bg-left);border:1px solid var(--border);border-radius:12px;padding:20px;width:320px;animation:mIn .22s ease}
 @keyframes mIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
 .mb h3{font-size:13px;font-weight:700;margin-bottom:10px}
@@ -827,20 +827,25 @@ function buildCropUI(c, container){
   vp.addEventListener('touchend',endDrag,{passive:true});
 
   /* zoom */
-  document.getElementById('cpZ').addEventListener('input',function(){
+  const cpZ=document.getElementById('cpZ');
+  if(cpZ) cpZ.addEventListener('input',function(){
     c.crop.sc=+this.value/100;
-    document.getElementById('cpZv').textContent=this.value+'%';
+    const cpZv=document.getElementById('cpZv');
+    if(cpZv) cpZv.textContent=this.value+'%';
     drawCropCanvas(c, document.getElementById('cpC'));
     renderPreview();
   });
 
   /* reset — sc를 1로 초기화 후 applyMinSc로 최솟값 보정 */
-  document.getElementById('cpRst').addEventListener('click',()=>{
+  const cpRst=document.getElementById('cpRst');
+  if(cpRst) cpRst.addEventListener('click',()=>{
     c.crop.x=.5; c.crop.y=.5; c.crop.sc=1;
     applyMinSc();
     const pct=Math.round(c.crop.sc*100);
-    document.getElementById('cpZ').value=pct;
-    document.getElementById('cpZv').textContent=pct+'%';
+    const cpZEl=document.getElementById('cpZ');
+    const cpZvEl=document.getElementById('cpZv');
+    if(cpZEl) cpZEl.value=pct;
+    if(cpZvEl) cpZvEl.textContent=pct+'%';
     drawCropCanvas(c, document.getElementById('cpC'));
     renderPreview();
   });
@@ -1261,7 +1266,7 @@ ${gThumbnails.length>0?`
   if(fBsz)fBsz.addEventListener('input',()=>{cards[ai].bodySize=+fBsz.value;document.getElementById('fBszV').textContent=fBsz.value+'px';renderPreview()});
 
   /* text align */
-  document.getElementById('alignPick').querySelectorAll('.align-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.getElementById('alignPick')?.querySelectorAll('.align-btn').forEach(b=>b.addEventListener('click',()=>{
     cards[ai].textAlign=b.dataset.align;
     renderAll();
   }));
@@ -1348,7 +1353,7 @@ ${gThumbnails.length>0?`
   });
 
   /* image upload */
-  document.getElementById('fImg').addEventListener('change',e=>{
+  document.getElementById('fImg')?.addEventListener('change',e=>{
     const f=e.target.files[0];if(!f)return;
     const fr=new FileReader();
     fr.onload=ev=>{
@@ -1363,7 +1368,7 @@ ${gThumbnails.length>0?`
 
   /* ── AI image generation ── */
   let aiSelectedStyle='';
-  document.getElementById('aiStyleRow').querySelectorAll('.ai-style-btn').forEach(btn=>{
+  document.getElementById('aiStyleRow')?.querySelectorAll('.ai-style-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.getElementById('aiStyleRow').querySelectorAll('.ai-style-btn').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
@@ -1371,7 +1376,7 @@ ${gThumbnails.length>0?`
     });
   });
 
-  document.getElementById('aiGenBtn').addEventListener('click',async()=>{
+  document.getElementById('aiGenBtn')?.addEventListener('click',async()=>{
     const promptRaw=document.getElementById('aiPrompt').value.trim();
     if(!promptRaw)return;
 
@@ -1520,7 +1525,7 @@ ${gThumbnails.length>0?`
     }));
 
   /* 폰트 전체 슬라이드 적용 */
-  document.getElementById('fontApplyAll').addEventListener('click',()=>{
+  document.getElementById('fontApplyAll')?.addEventListener('click',()=>{
     const f=cards[ai]?.font;
     if(!f)return;
     cards.forEach(c=>c.font=f);
@@ -2032,7 +2037,10 @@ async function captureCardDOM(c){
     await new Promise((res,rej)=>{
       const s=document.createElement('script');
       s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-      s.onload=res; s.onerror=rej;
+      s.onload=res;
+      s.onerror=()=>rej(new Error('html2canvas 라이브러리 로드 실패. 인터넷 연결을 확인해주세요.'));
+      // 10초 타임아웃
+      setTimeout(()=>rej(new Error('html2canvas 로드 시간 초과. 다시 시도해주세요.')),10000);
       document.head.appendChild(s);
     });
   }
@@ -2148,7 +2156,7 @@ document.addEventListener('click',function(){document.getElementById('saveDrop')
 document.getElementById('btnCopyUrl').addEventListener('click',()=>{
   const full=document.getElementById('imgUrlTxt').dataset.full;
   if(!full)return;
-  navigator.clipboard.writeText(full).then(()=>{
+  clipboardCopy(full,()=>{
     const b=document.getElementById('btnCopyUrl');
     b.textContent='복사됨 ✓';setTimeout(()=>b.textContent='복사',1600);
   });
@@ -2157,7 +2165,7 @@ document.getElementById('btnSaveAll').addEventListener('click',saveAllCards);
 document.getElementById('btnCopyAllUrls').addEventListener('click',()=>{
   const urls=document.getElementById('btnCopyAllUrls').dataset.urls||'';
   if(!urls)return;
-  navigator.clipboard.writeText(urls).then(()=>{
+  clipboardCopy(urls,()=>{
     const b=document.getElementById('btnCopyAllUrls');
     const orig=b.textContent;
     b.textContent='복사됨 ✓';setTimeout(()=>b.textContent=orig,1600);
@@ -2247,9 +2255,25 @@ async function saveAllCards(){
   }
 }
 
+function clipboardCopy(text,onSuccess){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(onSuccess).catch(()=>{
+      _clipboardFallback(text);onSuccess();
+    });
+  } else {
+    _clipboardFallback(text);onSuccess();
+  }
+}
+function _clipboardFallback(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';ta.style.top='-9999px';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');}catch(_){}
+  document.body.removeChild(ta);
+}
 function copyBatchUrl(btn,url){
   const decoded=decodeURIComponent(url);
-  navigator.clipboard.writeText(decoded).then(()=>{
+  clipboardCopy(decoded,()=>{
     const orig=btn.textContent;
     btn.textContent='복사됨 ✓';
     setTimeout(()=>btn.textContent=orig,1600);
