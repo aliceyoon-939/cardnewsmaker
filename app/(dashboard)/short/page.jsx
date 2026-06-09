@@ -1,6 +1,24 @@
 'use client'
 import React, { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+// ── 준비중 페이지 ────────────────────────────────────────────────
+export default function ShortPage() {
+  const router = useRouter()
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 12 }}>
+      <div style={{ fontSize: 32 }}>🚧</div>
+      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx1)' }}>숏폼 기능 준비 중</div>
+      <div style={{ fontSize: 12, color: 'var(--tx3)' }}>2차 스펙에서 오픈 예정입니다</div>
+      <button className="btn-g" style={{ fontSize: 11, padding: '7px 16px', marginTop: 8 }} onClick={() => router.push('/trend')}>
+        트렌드서치로 돌아가기
+      </button>
+    </div>
+  )
+}
+
+// ── 원본 컴포넌트 (비활성화) ─────────────────────────────────────
+function _OriginalShortPage() {
 import { useSave } from '@/contexts/SaveContext'
 import { parseDuration, SUB_FONTS, drawScene, imgLoad } from '@/lib/canvasUtils'
 import { exportVideo as runExportVideo } from '@/lib/videoExport'
@@ -1685,4 +1703,5 @@ export default function ShortPage() {
       <ShortInner />
     </Suspense>
   )
+}
 }
