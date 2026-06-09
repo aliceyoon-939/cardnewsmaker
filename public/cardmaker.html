@@ -658,13 +658,13 @@ function drawCropCanvas(c, canvas){
   // canvas.width/height are the actual pixel buffer size (may be DPR-scaled)
   const W=canvas.width, H=canvas.height;
   const ctx=canvas.getContext('2d');
+  // CSS filter: 브라우저 호환성 높음 (ctx.filter는 Safari 구버전 미지원)
+  canvas.style.filter = c.imgFilter || 'none';
   getImg(c.imgSrc).then(img=>{
     const iw=img.naturalWidth, ih=img.naturalHeight;
     const t=getCropTransform(iw,ih,W,H,c.crop);
     ctx.clearRect(0,0,W,H);
-    ctx.filter = c.imgFilter || 'none';
     ctx.drawImage(img, t.sx, t.sy, t.sw, t.sh, 0, 0, W, H);
-    ctx.filter = 'none';
   });
 }
 
@@ -2051,6 +2051,7 @@ async function captureCardDOM(c){
       if(!cl)return;
       cl.width=orig.width; cl.height=orig.height;
       cl.getContext('2d').drawImage(orig,0,0);
+      if(orig.style.filter) cl.style.filter=orig.style.filter; // CSS 필터 복사
     }catch(_){}
   });
 
