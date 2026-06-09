@@ -10,7 +10,7 @@ async function fetchVideoDetails(videoId, ytKey) {
   if (!item) return null
   return {
     title: item.snippet.title,
-    description: (item.snippet.description || '').slice(0, 600),
+    description: (item.snippet.description || '').slice(0, 1200),
     tags: (item.snippet.tags || []).slice(0, 10),
     publishedAt: item.snippet.publishedAt,
     channelTitle: item.snippet.channelTitle,
@@ -37,7 +37,7 @@ async function fetchCaptions(videoId) {
         .join(' ')
         .replace(/\s+/g, ' ')
         .trim()
-        .slice(0, 1500)
+        .slice(0, 3000)
       if (text.length > 80) return { lang, text }
     } catch {}
   }
@@ -67,6 +67,31 @@ async function fetchNews(artist) {
   }
 }
 
+function detectVi(text) {
+  return /[àáâãèéêìíòóôõùúýăđơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i.test(text)
+}
+
+async function fetchComments(videoId, ytKey) {
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&order=relevance&key=${ytKey}`,
+      { cache: 'no-store' }
+    )
+    const data = await res.json()
+    const parsed = (data.items || []).map(item => {
+      const s = item.snippet.topLevelComment.snippet
+      const text = (s.textDisplay || '').replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').trim()
+      return { text, likes: s.likeCount || 0, isVi: detectVi(text) }
+    }).filter(c => c.text.length > 5)
+
+    const viTop  = parsed.filter(c => c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 10)
+    const others = parsed.filter(c => !c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 10)
+    return [...viTop, ...others].slice(0, 20).map(c => c.text)
+  } catch {
+    return []
+  }
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url)
   const videoId = searchParams.get('videoId') || ''
@@ -80,11 +105,12 @@ export async function GET(req) {
   if (!YT_KEY) return NextResponse.json({ error: 'YouTube API 키 없음' }, { status: 500 })
 
   // videoId 없어도 뉴스는 항상 수집
-  const [video, captions, news, mainThumb] = await Promise.all([
+  const [video, captions, news, mainThumb, comments] = await Promise.all([
     videoId ? fetchVideoDetails(videoId, YT_KEY) : Promise.resolve(null),
     videoId ? fetchCaptions(videoId)             : Promise.resolve(null),
     fetchNews(artist),
     videoId ? fetchThumbnail(videoId)            : Promise.resolve(null),
+    videoId ? fetchComments(videoId, YT_KEY)     : Promise.resolve([]),
   ])
 
   const channelThumbs = video?.channelId
@@ -93,7 +119,7 @@ export async function GET(req) {
 
   const thumbnails = [mainThumb, ...channelThumbs].filter(Boolean).slice(0, 5)
 
-  return NextResponse.json({ video, captions, news, thumbnail: mainThumb, thumbnails })
+  return NextResponse.json({ video, captions, news, thumbnail: mainThumb, thumbnails, comments })
 }
 
 async function fetchThumbnailFromUrl(url) {

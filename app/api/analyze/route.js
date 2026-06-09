@@ -132,7 +132,7 @@ export async function GET(request) {
     if (videoId) {
       try {
         const commRes = await fetch(
-          `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=30&order=relevance&key=${YT_KEY}`,
+          `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&order=relevance&key=${YT_KEY}`,
           { cache: 'no-store' }
         )
         const commData = await commRes.json()
@@ -142,10 +142,10 @@ export async function GET(request) {
           return { text, likes: s.likeCount || 0, isVi: detectVi(text) }
         }).filter(c => c.text.length > 5)
 
-        // 베트남어 댓글 우선 (최대 5개) + 전체 상위 (최대 4개, 중복 제외)
-        const viTop  = parsed.filter(c => c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 5)
-        const others = parsed.filter(c => !c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 4)
-        fanComments  = [...viTop, ...others].slice(0, 8)
+        // 베트남어 댓글 우선 (최대 10개) + 전체 상위 (최대 10개, 중복 제외)
+        const viTop  = parsed.filter(c => c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 10)
+        const others = parsed.filter(c => !c.isVi).sort((a, b) => b.likes - a.likes).slice(0, 10)
+        fanComments  = [...viTop, ...others].slice(0, 20)
       } catch {
         // 댓글 비활성화 등 실패 시 조용히 무시 — 분석은 계속
       }
