@@ -199,6 +199,7 @@ function CardInner() {
   const [crawlLoading, setCrawlLoading] = useState(false)
   const [crawlData,    setCrawlData]    = useState(null) // { title, description, image, site, text, url }
   const [crawlError,   setCrawlError]   = useState('')
+  const [crawlOpen,    setCrawlOpen]    = useState(true)
 
   async function doCrawl() {
     if (!crawlUrl.trim()) return
@@ -421,74 +422,111 @@ function CardInner() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-      {/* ── 기사 크롤링 패널 ── */}
-      <div style={{
-        borderBottom: '1px solid var(--b1)', background: 'var(--s1)',
-        padding: '10px 14px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8,
-      }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx2)', whiteSpace: 'nowrap' }}>🔗 기사 링크</span>
-          <input
-            type="url"
-            value={crawlUrl}
-            onChange={e => setCrawlUrl(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && doCrawl()}
-            placeholder="https://news.daum.net/... 또는 다른 기사 URL"
-            style={{
-              flex: 1, background: 'var(--s2)', border: '1px solid var(--b1)',
-              borderRadius: 'var(--r-sm)', padding: '7px 11px', fontSize: 12,
-              color: 'var(--tx1)', outline: 'none', fontFamily: 'inherit',
-            }}
-          />
-          <button
-            className="btn-g"
-            style={{ fontSize: 11, padding: '7px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}
-            onClick={doCrawl}
-            disabled={crawlLoading || !crawlUrl.trim()}
-          >
-            {crawlLoading ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />수집 중</> : '📰 기사 크롤링'}
-          </button>
+      {/* ── 기사 크롤링 패널 (접기/펼치기) ── */}
+      <div style={{ borderBottom: '1px solid var(--b1)', flexShrink: 0 }}>
+
+        {/* 진입점 버튼 — 항상 표시 */}
+        <div
+          onClick={() => { setCrawlOpen(o => !o); setCrawlError('') }}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 16px 14px', cursor: 'pointer', userSelect: 'none',
+            background: crawlOpen ? 'var(--s2)' : 'var(--s1)',
+            transition: 'background .15s',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx1)', letterSpacing: '-.01em' }}>기사 URL로 자동 생성</div>
+            <div style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 4 }}>
+              {crawlData ? `✓ ${crawlData.title.slice(0, 28)}…` : '뉴스 기사를 붙여넣으면 슬라이드를 자동 생성합니다'}
+            </div>
+          </div>
+          <span style={{ fontSize: 11, color: 'var(--tx3)', transition: 'transform .2s', display: 'inline-block', transform: crawlOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </div>
 
-        {crawlError && (
-          <div style={{ fontSize: 11, color: 'var(--pink)', padding: '4px 8px', background: 'rgba(244,114,182,.08)', borderRadius: 'var(--r-sm)' }}>
-            ⚠️ {crawlError}
-          </div>
-        )}
+        {/* 펼쳐진 입력 영역 */}
+        {crawlOpen && (
+          <div style={{ padding: '0 16px 16px', background: 'var(--s2)', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-        {crawlData && (
-          <div style={{
-            display: 'flex', gap: 10, alignItems: 'flex-start',
-            background: 'var(--s2)', border: '1px solid var(--b1)',
-            borderRadius: 'var(--r-sm)', padding: '10px 12px',
-          }}>
-            {crawlData.image && (
-              <img src={crawlData.image} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
-            )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx1)', marginBottom: 2,
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {crawlData.title}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 6 }}>
-                {crawlData.site} · {crawlData.text.length.toLocaleString()}자 추출
-                {crawlData.images?.length > 0 && (
-                  <span style={{ marginLeft: 6, color: 'var(--lime)', fontWeight: 700 }}>
-                    🖼 사진 {crawlData.images.length}장
-                  </span>
-                )}
-              </div>
+            {/* URL 입력 + 버튼 */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                type="url"
+                value={crawlUrl}
+                onChange={e => setCrawlUrl(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && doCrawl()}
+                placeholder="https://news.daum.net/... 또는 다른 기사 URL"
+                autoFocus
+                style={{
+                  flex: 1, background: 'var(--s1)', border: '1px solid var(--b1)',
+                  borderRadius: 'var(--r-sm)', padding: '9px 12px', fontSize: 12,
+                  color: 'var(--tx1)', outline: 'none', fontFamily: 'inherit',
+                }}
+              />
               <button
-                className="btn"
-                style={{ fontSize: 11, padding: '5px 14px', fontWeight: 700 }}
-                onClick={generateFromCrawl}
-                disabled={isLoading}
+                onClick={doCrawl}
+                disabled={crawlLoading || !crawlUrl.trim()}
+                style={{
+                  flexShrink: 0, whiteSpace: 'nowrap', cursor: 'pointer',
+                  fontSize: 12, fontWeight: 800, padding: '9px 18px',
+                  borderRadius: 'var(--r-sm)', border: 'none', fontFamily: 'inherit',
+                  background: crawlLoading || !crawlUrl.trim()
+                    ? 'rgba(190,242,100,0.25)'
+                    : 'var(--lime)',
+                  color: crawlLoading || !crawlUrl.trim() ? 'rgba(0,0,0,0.35)' : '#09090b',
+                  boxShadow: crawlLoading || !crawlUrl.trim() ? 'none' : '0 0 0 2px rgba(190,242,100,0.4)',
+                  transition: 'all .15s',
+                }}
               >
-                {isLoading
-                  ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />생성 중</>
-                  : '🎨 카드뉴스로 만들기'}
+                {crawlLoading
+                  ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />수집 중</>
+                  : '📰 크롤링 시작'}
               </button>
             </div>
+
+            {/* 에러 */}
+            {crawlError && (
+              <div style={{ fontSize: 11, color: 'var(--pink)', padding: '6px 10px', background: 'rgba(244,114,182,.08)', borderRadius: 'var(--r-sm)' }}>
+                ⚠️ {crawlError}
+              </div>
+            )}
+
+            {/* 수집 결과 */}
+            {crawlData && (
+              <div style={{
+                display: 'flex', gap: 10, alignItems: 'flex-start',
+                background: 'var(--s1)', border: '1px solid var(--b1)',
+                borderRadius: 'var(--r-sm)', padding: '10px 12px',
+              }}>
+                {crawlData.image && (
+                  <img src={crawlData.image} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx1)', marginBottom: 2,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {crawlData.title}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 8 }}>
+                    {crawlData.site} · {crawlData.text.length.toLocaleString()}자 추출
+                    {crawlData.images?.length > 0 && (
+                      <span style={{ marginLeft: 6, color: 'var(--lime)', fontWeight: 700 }}>
+                        🖼 사진 {crawlData.images.length}장
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    className="btn"
+                    style={{ fontSize: 11, padding: '6px 16px', fontWeight: 700, width: '100%' }}
+                    onClick={() => { generateFromCrawl(); setCrawlOpen(false) }}
+                    disabled={isLoading}
+                  >
+                    {isLoading
+                      ? <><span className="spin" style={{ width: 10, height: 10, borderWidth: 1.5, display: 'inline-block', marginRight: 4 }} />생성 중</>
+                      : '🎨 카드뉴스로 만들기'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

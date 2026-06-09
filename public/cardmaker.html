@@ -12,13 +12,13 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --pink:#bef264;--purple:#a78bfa;
-  --dark:#0D0D1A;--border:rgba(255,255,255,0.08);
+  --dark:#0D0D0F;--border:rgba(255,255,255,0.08);
   --tp:#F0F0F5;--ts:rgba(240,240,245,0.72);--tt:rgba(240,240,245,0.35);
   --font:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
-  --bg-app:#0D0D1A;
-  --bg-left:#090912;
-  --bg-mid:#0E0E1C;
-  --bg-right:#07070F;
+  --bg-app:#0D0D0F;
+  --bg-left:#0C0C0E;
+  --bg-mid:#111113;
+  --bg-right:#0A0A0C;
   --bg-input:rgba(255,255,255,0.04);
   --bg-input-focus:rgba(190,242,100,0.03);
   --bd-input:rgba(255,255,255,0.12);
@@ -298,7 +298,7 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 .nav-btn{width:24px;height:24px;border:1px solid var(--stroke);border-radius:5px;background:var(--bg-card-item);color:var(--ts);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .13s}
 .nav-btn:hover:not(:disabled){border-color:var(--stroke-hover);color:var(--tp)}
 .nav-btn:disabled{opacity:.28;cursor:default}
-.pr-area{flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:24px 20px;background:#141420}
+.pr-area{flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:24px 20px;background:#141416}
 .pr-area::-webkit-scrollbar{width:3px}
 .pr-area::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:2px}
 .pr-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
@@ -316,10 +316,14 @@ html,body{font-family:var(--font);background:var(--bg-app);color:var(--tp);heigh
 .save-split{position:relative;display:flex;border-radius:7px}
 .save-main{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:7px 0 0 7px;border:none;background:var(--pink);color:#09090b;font-size:11px;font-weight:700;font-family:var(--font);cursor:pointer;transition:opacity .13s}
 .save-main:hover{opacity:.88}
-.save-arrow{width:30px;display:flex;align-items:center;justify-content:center;border-radius:0 7px 7px 0;border:none;border-left:1.5px solid rgba(0,0,0,0.18);background:var(--pink);color:#09090b;font-size:12px;cursor:pointer;transition:opacity .13s;flex-shrink:0}
-.save-arrow:hover{opacity:.88}
+.save-arrow{width:34px;display:flex;align-items:center;justify-content:center;border-radius:0 7px 7px 0;border:none;border-left:1.5px solid rgba(0,0,0,0.18);background:var(--pink);color:#09090b;font-size:12px;cursor:pointer;transition:background .13s,opacity .13s;flex-shrink:0;position:relative}
+.save-arrow:hover{background:rgba(190,242,100,0.85)}
+.save-arrow::after{content:'JPG·더보기';position:absolute;bottom:calc(100% + 6px);right:0;background:rgba(0,0,0,0.82);color:#fff;font-size:9px;font-weight:600;white-space:nowrap;padding:4px 7px;border-radius:5px;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.save-arrow:hover::after{opacity:1;transform:translateY(0)}
 .save-drop{position:absolute;bottom:calc(100% + 6px);right:0;min-width:136px;background:var(--bg-left);border:1px solid var(--border);border-radius:8px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:50;display:none}
 .save-drop.open{display:block}
+.save-split.open .save-arrow{background:rgba(190,242,100,0.85);transform:none}
+.save-split.open .save-arrow::before{content:'';display:inline-block;transform:rotate(180deg)}
 .save-drop-item{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:6px;font-size:11px;font-weight:600;color:var(--tp);font-family:var(--font);cursor:pointer;transition:background .13s;white-space:nowrap}
 .save-drop-item:hover{background:var(--bg-card-hover);color:var(--pink)}
 
@@ -549,7 +553,7 @@ const PAL=[
   {id:'gold',  l:'골드',   c1:'#F0A500',c2:'#FF6B6B',bg:'#0C0900',cn:'rgba(240,165,0,.17)', ct:'#F5B833'},
   {id:'neo',   l:'네온',   c1:'#FF2FA8',c2:'#2FFFD8',bg:'#06020D',cn:'rgba(255,47,168,.16)',ct:'#FF55BB'},
 ];
-const SL=[{id:'top',l:'이미지 상단'},{id:'bottom',l:'이미지 하단'},{id:'text',l:'텍스트 전용'},{id:'imgonly',l:'이미지 기본'},{id:'split',l:'반반 분할'}];
+const SL=[{id:'top',l:'이미지 상단'},{id:'bottom',l:'이미지 하단'},{id:'text',l:'텍스트 전용'},{id:'imgonly',l:'이미지 기본'}];
 const OL=[{id:'bg',l:'균일 오버레이'},{id:'grad-down',l:'↑ 그라데이션'},{id:'vignette',l:'비네트'},{id:'grad-up',l:'↓ 그라데이션'},{id:'grad-left',l:'→ 그라데이션'},{id:'colorwash',l:'컬러 워시'}];
 const AL=[...SL,...OL];
 const RATIOS={
@@ -896,7 +900,7 @@ function tSVG(id,c1,c2){
 /* ══ RENDER LIST ══ */
 function renderList(){
   const el=document.getElementById('cList');
-  if(!cards.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--tt);font-size:10px">카드가 없습니다</div>';return}
+  if(!cards.length){el.innerHTML='<div style="padding:20px 16px;text-align:center;color:var(--tt);font-size:10px;line-height:1.7">카드가 없습니다<br><span style="color:var(--ts);font-size:11px;font-weight:600">아래 <span style="color:var(--lime)">+ 카드 추가</span> 버튼을 눌러 시작하세요</span></div>';return}
   el.innerHTML=cards.map((c,i)=>`
 <div class="ct ${i===ai?'on':''}" data-i="${i}" draggable="true">
   <div class="ct-drag" data-drag="${i}"><span></span><span></span><span></span></div>
@@ -957,7 +961,7 @@ function renderEditor(){
   const body=document.getElementById('eBody');
   const badge=document.getElementById('eBadge');
   const savedScroll=body.scrollTop;
-  if(ai<0||!cards[ai]){badge.textContent='—';body.innerHTML='<div style="color:var(--tt);font-size:11px;text-align:center;padding:32px 0">왼쪽에서 카드를 선택하거나 추가하세요</div>';return}
+  if(ai<0||!cards[ai]){badge.textContent='—';body.innerHTML='<div style="color:var(--tt);font-size:11px;text-align:center;padding:32px 16px;line-height:1.8">왼쪽 목록에서 카드를 선택하거나<br><span style="color:var(--lime);font-weight:700">+ 카드 추가</span> 버튼으로 새 카드를 만드세요</div>';return}
   const c=cards[ai];
   badge.textContent=`카드 ${ai+1}`;
   const isOv=OL.some(l=>l.id===c.layout);
@@ -966,7 +970,7 @@ function renderEditor(){
 
   const _mkLayout=(list)=>list.map(l=>`<button class="lpick ${c.layout===l.id?'on':''}" data-l="${l.id}">
 <svg viewBox="0 0 72 50">${tSVG(l.id,pal.c1,pal.c2)}</svg><div class="lp-lbl">${l.l}</div></button>`).join('');
-  const solidBtns=_mkLayout(_slExp?SL:SL.slice(0,3));
+  const solidBtns=_mkLayout(SL);
   const ovBtns=_mkLayout(_olExp?OL:OL.slice(0,3));
 
   body.innerHTML=`
@@ -1070,7 +1074,6 @@ ${gThumbnails.length>0?`
   <div class="lgrp">
     <div class="lgrp-hd"><span class="lgrp-badge s">기본형</span><span class="lgrp-desc">구역이 선명하게 나뉘는 레이아웃</span></div>
     <div class="lgrp-row" id="slPick">${solidBtns}</div>
-    ${_moreBtn('sl',_slExp)}
   </div>
 </div>
 
@@ -1577,7 +1580,7 @@ function renderPreview(){
   const area=document.getElementById('pArea');
   if(!cards.length){
     _pvSig=null;
-    area.innerHTML=`<div class="empty-st"><svg width="42" height="42" viewBox="0 0 42 42" fill="none"><rect x="6" y="6" width="30" height="30" rx="6" stroke="white" stroke-width="1.7"/><path d="M14 21h14" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg><p>카드를 추가하면<br/>미리보기가 표시됩니다</p></div>`;
+    area.innerHTML=`<div class="empty-st"><svg width="42" height="42" viewBox="0 0 42 42" fill="none"><rect x="6" y="6" width="30" height="30" rx="6" stroke="white" stroke-width="1.7"/><path d="M14 21h14" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg><p>카드를 추가하면<br/>미리보기가 표시됩니다</p><p style="font-size:10px;margin-top:8px;color:var(--tt)">왼쪽 하단 <span style="color:var(--lime);font-weight:700">+ 카드 추가</span> 버튼을 눌러보세요</p></div>`;
     return;
   }
   const idx=ai<0?0:ai;
@@ -2150,9 +2153,22 @@ function updateImgUrlRow(url, hint){
 }
 
 document.getElementById('btnSavePng').addEventListener('click',()=>saveCard('png'));
-document.getElementById('btnSaveJpg').addEventListener('click',()=>{document.getElementById('saveDrop').classList.remove('open');saveCard('jpg')});
-document.getElementById('btnSaveArrow').addEventListener('click',function(e){e.stopPropagation();document.getElementById('saveDrop').classList.toggle('open')});
-document.addEventListener('click',function(){document.getElementById('saveDrop').classList.remove('open')});
+document.getElementById('btnSaveJpg').addEventListener('click',()=>{
+  document.getElementById('saveDrop').classList.remove('open');
+  document.getElementById('saveSplit').classList.remove('open');
+  saveCard('jpg');
+});
+document.getElementById('btnSaveArrow').addEventListener('click',function(e){
+  e.stopPropagation();
+  const drop=document.getElementById('saveDrop');
+  const split=document.getElementById('saveSplit');
+  const isOpen=drop.classList.toggle('open');
+  split.classList.toggle('open',isOpen);
+});
+document.addEventListener('click',function(){
+  document.getElementById('saveDrop').classList.remove('open');
+  document.getElementById('saveSplit').classList.remove('open');
+});
 document.getElementById('btnCopyUrl').addEventListener('click',()=>{
   const full=document.getElementById('imgUrlTxt').dataset.full;
   if(!full)return;
