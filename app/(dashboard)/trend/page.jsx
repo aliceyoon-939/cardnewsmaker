@@ -99,7 +99,7 @@ function TopicCard({ topic, artist, onScript }) {
 }
 
 /* ── FeedRow ─────────────────────────────────────────────── */
-function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onShort, onCard }) {
+function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onReanalyze, onScript, onShort, onCard }) {
   const isTrend = item._type === 'trending'
   const days    = daysSince(item.publishedAt)
   const isStale = isTrend && days >= 7
@@ -253,10 +253,18 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
           {/* 분석 결과 */}
           {anl?.data && (
             <div style={{ marginTop: 12 }}>
-              {/* 주제 추천 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--tx3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>AI 주제 추천</span>
-                <span style={{ fontSize: 9, color: 'var(--tx3)' }}>· YouTube {anl.data.refVideos?.length}개 영상 분석</span>
+              {/* 주제 추천 헤더 + 다시 분석하기 */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--tx3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>AI 주제 추천</span>
+                  <span style={{ fontSize: 9, color: 'var(--tx3)' }}>· YouTube {anl.data.refVideos?.length}개 영상 분석</span>
+                </div>
+                <button
+                  onClick={onReanalyze}
+                  style={{ fontSize: 9, padding: '2px 8px', borderRadius: 4, background: 'transparent', border: '1px solid var(--b1)', color: 'var(--tx3)', cursor: 'pointer' }}
+                >
+                  ↻ 다시 분석
+                </button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                 {anl.data.topics.map((topic, i) => (
@@ -330,11 +338,21 @@ export default function TrendPage() {
   const [releases,       setReleases]       = useState([])
   const [releasesLoading,setReleasesLoading]= useState(true)
   const [selected,       setSelected]       = useState(null)
-  const [analysis,       setAnalysis]       = useState({})
+  const [analysis,       setAnalysis]       = useState(() => {
+    // 페이지 복귀 시 이전 분석 결과 복원
+    if (typeof window === 'undefined') return {}
+    try { return JSON.parse(sessionStorage.getItem('trendAnalysis') || '{}') } catch { return {} }
+  })
   const [news,           setNews]           = useState([])
   const [newsLoading,    setNewsLoading]    = useState(true)
   const [selectedNews,   setSelectedNews]   = useState(null)
   const [filter,         setFilter]         = useState('전체')
+
+  // 분석 결과 변경 시 sessionStorage에 저장
+  useEffect(() => {
+    if (Object.keys(analysis).length > 0)
+      sessionStorage.setItem('trendAnalysis', JSON.stringify(analysis))
+  }, [analysis])
 
   useEffect(() => { fetchTrends(); fetchReleases(); fetchNews() }, [])
 
@@ -407,9 +425,9 @@ export default function TrendPage() {
     fetchTrends(); fetchReleases(); fetchNews()
   }
 
-  async function analyzeArtist(item) {
+  async function analyzeArtist(item, force = false) {
     const key = item.videoId
-    if (analysis[key]?.data || analysis[key]?.loading) return
+    if (!force && (analysis[key]?.data || analysis[key]?.loading)) return
     setAnalysis(prev => ({ ...prev, [key]: { loading: true, data: null, error: '' } }))
     try {
       const qs = new URLSearchParams({ artist: item.artist, title: item.title, videoId: item.videoId })
@@ -565,6 +583,7 @@ export default function TrendPage() {
                       anl={analysis[item.videoId]}
                       badge={getBadge(item, maxTrendScore)}
                       onAnalyze={() => analyzeArtist(item)}
+                      onReanalyze={() => analyzeArtist(item, true)}
                       onScript={(t, fmt) => goScript(t, fmt, item.artist, item.videoId)}
                       onShort={() => router.push(`/short?artist=${encodeURIComponent(item.artist)}&topic=${encodeURIComponent(item.title)}&videoId=${item.videoId}`)}
                       onCard={() => router.push(`/card?artist=${encodeURIComponent(item.artist)}&topic=${encodeURIComponent(item.title)}&videoId=${item.videoId}`)}

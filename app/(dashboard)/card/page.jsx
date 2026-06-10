@@ -175,6 +175,13 @@ function CardInner() {
   const [koSlides,      setKoSlides]      = useState([])
   const [refreshingIdx, setRefreshingIdx] = useState(-1)
   const lastMsgRef = useRef(null) // 마지막으로 전송한 fillSlides 메시지 저장
+  const [showBackConfirm, setShowBackConfirm] = useState(false)
+
+  function handleBack() {
+    // 작업 중(생성 완료 또는 진행 중)일 때만 확인 다이얼로그 표시
+    if (status !== 'idle') { setShowBackConfirm(true); return }
+    router.push('/trend')
+  }
 
   // 슬라이드별 썸네일 + 이미지 피커
   const [cardThumbs,  setCardThumbs]  = useState([])
@@ -422,6 +429,40 @@ function CardInner() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
+      {/* ── 뒤로가기 확인 다이얼로그 ── */}
+      {showBackConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999,
+          background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'var(--s2)', border: '1px solid var(--b1)',
+            borderRadius: 12, padding: '24px 28px', width: 300, textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 22, marginBottom: 10 }}>⚠️</div>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>트렌드서치로 돌아가시겠습니까?</div>
+            <div style={{ fontSize: 11, color: 'var(--tx3)', marginBottom: 20, lineHeight: 1.5 }}>
+              현재 작업 중인 카드뉴스 내용은<br/>저장되지 않습니다.
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setShowBackConfirm(false)}
+                style={{ flex: 1, padding: '8px 0', borderRadius: 7, border: '1px solid var(--b1)', background: 'var(--s1)', color: 'var(--tx2)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => router.push('/trend')}
+                style={{ flex: 1, padding: '8px 0', borderRadius: 7, border: 'none', background: 'var(--lime)', color: '#09090b', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+              >
+                나가기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── 기사 크롤링 패널 (2-STEP 레이아웃) ── */}
       <div style={{ borderBottom: '1px solid var(--b1)', flexShrink: 0 }}>
 
@@ -551,7 +592,7 @@ function CardInner() {
                 ↻ 재생성
               </button>
             )}
-            <button className="btn-g" style={{ fontSize: 10, padding: '4px 10px' }} onClick={() => router.push('/trend')}>
+            <button className="btn-g" style={{ fontSize: 10, padding: '4px 10px' }} onClick={handleBack}>
               ← 트렌드서치
             </button>
           </div>
