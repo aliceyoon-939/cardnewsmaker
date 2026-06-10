@@ -2071,26 +2071,30 @@ async function captureCardDOM(c){
     }catch(_){}
   });
 
-  // 인라인 style에서 scale 트랜스폼 제거 후 고정 위치로 오프스크린 배치
+  // 인라인 style에서 scale 트랜스폼 제거 후 오프스크린 배치
   let st=clone.getAttribute('style')||'';
   st=st.replace(/\btransform\s*:[^;]+;?\s*/gi,'');
   st=st.replace(/\btransform-origin\s*:[^;]+;?\s*/gi,'');
   clone.setAttribute('style',st);
   clone.style.position='fixed';
   clone.style.left='0'; clone.style.top='0';
-  clone.style.zIndex='-1';
+  clone.style.zIndex='99999';
   clone.style.pointerEvents='none';
+  // border-radius 제거 → PNG 모서리 잘림 방지 (직각 사각형 출력)
+  clone.style.borderRadius='0';
 
   // ── CSS custom property 해결 (html2canvas는 var(--x) 미지원) ──
   // 1) 배경색: computed backgroundColor를 clone에 명시 적용
   const computedBg = window.getComputedStyle(cardEl).backgroundColor;
-  if(computedBg && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'transparent'){
-    clone.style.background = computedBg;
+  const solidBg = (computedBg && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'transparent')
+    ? computedBg : null;
+  if(solidBg){
+    clone.style.background = solidBg;
   }
   // 텍스트 영역(top/bottom 레이아웃)도 부모 bg 명시 적용
   const textWrap = clone.querySelector('#pv-text-wrap:not([data-ov-text])');
   if(textWrap){
-    textWrap.style.background = (computedBg && computedBg !== 'rgba(0, 0, 0, 0)') ? computedBg : 'inherit';
+    textWrap.style.background = solidBg || 'inherit';
   }
   // 2) 팔레트 커스텀 프로퍼티 → 인라인 스타일로 치환
   const c1    = cardEl.style.getPropertyValue('--_c1').trim();
@@ -2102,6 +2106,11 @@ async function captureCardDOM(c){
   }
   if(cnum)  clone.querySelectorAll('.cn-s').forEach(el => { el.style.background = cnum; });
   if(cnumt) clone.querySelectorAll('.cn-s').forEach(el => { el.style.color = cnumt; });
+
+  // html2canvas는 페이지 전체를 캡처 후 요소 영역을 잘라냄
+  // → 캡처 중 UI 패널을 숨겨야 합성 방지
+  const shellEl = document.querySelector('.shell');
+  if(shellEl) shellEl.style.visibility='hidden';
   document.body.appendChild(clone);
 
   // 외부 img src → base64 data URL로 교체 (html2canvas CORS 우회)
@@ -2127,9 +2136,11 @@ async function captureCardDOM(c){
       useCORS:true,
       allowTaint:false,
       logging:false,
-      backgroundColor:null,
+      backgroundColor: solidBg || '#000000',
     });
   }finally{
+    // UI 복원 및 클론 제거
+    if(shellEl) shellEl.style.visibility='';
     document.body.removeChild(clone);
   }
 }
