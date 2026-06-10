@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { callSolar } from '@/app/lib/solar'
 export const dynamic = 'force-dynamic'
 
 // ── 인메모리 캐시 (15분) ─────────────────────────────────
@@ -43,40 +44,29 @@ function isKpopIdolNews(title) {
   return KPOP_NEWS_KEYWORDS.some(k => t.includes(k))
 }
 
-// ── 제목 일괄 한국어 번역 (Claude) ───────────────────────
+// ── 제목 일괄 한국어 번역 (Solar) ────────────────────────
 async function translateTitles(titles) {
-  const API_KEY = process.env.ANTHROPIC_API_KEY
-  if (!API_KEY) return titles
-
   const numbered = titles.map((t, i) => `${i + 1}. ${t}`).join('\n')
-  const prompt = `You are a K-pop expert translator. Translate these English Soompi news headlines into natural Korean.
+  const prompt = `한국 엔터테인먼트 매체의 전문 기자로서 아래 Soompi 영어 헤드라인을 자연스러운 한국어 뉴스 제목으로 번역하세요.
 
-Rules:
-- Use official Korean names for K-pop groups/artists (e.g. BOYNEXTDOOR→보이넥스트도어, aespa→에스파, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TOMORROW X TOGETHER→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZEROBASEONE→제로베이스원, ILLIT→아일릿, RIIZE→라이즈, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, NMIXX→엔믹스, ITZY→있지, TWICE→트와이스, BLACKPINK→블랙핑크, BTS→방탄소년단(BTS), RED VELVET→레드벨벳, NCT→엔시티)
-- Keep song titles and album titles in original English with quotes
-- Natural, concise Korean headline style (not stiff news-speak)
-- Return ONLY valid JSON, no markdown, no explanation
-- Format: {"translations":["번역1","번역2",...]}
+번역 규칙:
+- 짧고 임팩트 있게 (15~30자 권장)
+- 직역 금지 — 의미를 자연스럽게 전달
+- 아티스트명은 팬들이 쓰는 한국명 사용
+  (aespa→에스파, BABYMONSTER→베이비몬스터, BOYNEXTDOOR→보이넥스트도어, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TXT→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZB1→제로베이스원, ILLIT→아일릿, RIIZE→라이즈, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, NMIXX→엔믹스, ITZY→있지, TWICE→트와이스, BLACKPINK→블랙핑크, BTS→방탄소년단, RED VELVET→레드벨벳, NCT→엔시티, EXO→엑소, SHINee→샤이니, GOT7→갓세븐)
+- 곡·앨범 제목은 원문 영어 유지 (따옴표)
+- "-하고 있어", "-열어두고 있어" 같은 어색한 종결 금지 → 능동 단문 사용
+- JSON만 반환 (마크다운 없이): {"translations":["번역1","번역2",...]}
 
-Headlines:
+번역 예시:
+❌ "권소현, 새 드라마에서 전 그룹 멤버를 무시하는 아이돌 출신 배우 역할"
+✅ "권소현, 신드라마 'Love In Sync'서 아이돌 출신 배우 열연"
+
+번역할 제목:
 ${numbered}`
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
-    const data = await res.json()
-    const raw = data.content?.[0]?.text || ''
+    const raw = await callSolar(prompt, 1024)
     const start = raw.indexOf('{')
     const end   = raw.lastIndexOf('}')
     const jsonStr = start !== -1 && end !== -1 ? raw.slice(start, end + 1) : raw
