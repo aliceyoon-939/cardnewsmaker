@@ -176,7 +176,7 @@ export async function GET(request) {
     if (!res.ok) throw new Error(`Soompi RSS 오류: ${res.status}`)
 
     const xml      = await res.text()
-    const filtered = parseRSSItems(xml).filter(item => isKpopIdolNews(item.title)).slice(0, 5)
+    const filtered = parseRSSItems(xml).filter(item => isKpopIdolNews(item.title)).slice(0, 7)
 
     // Gemini로 제목 일괄 번역
     let titles = filtered.map(i => i.title)

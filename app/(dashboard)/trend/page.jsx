@@ -507,7 +507,7 @@ export default function TrendPage() {
       </div>
 
       {/* 2-컬럼 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 460px', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 16, alignItems: 'start' }}>
 
         {/* ── 좌측: 피드 테이블 ─────────────────────────────── */}
         <div>
