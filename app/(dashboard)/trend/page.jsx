@@ -253,24 +253,6 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
           {/* 분석 결과 */}
           {anl?.data && (
             <div style={{ marginTop: 12 }}>
-              {/* 베트남 팬 반응 */}
-              {anl.data.fanComments?.length > 0 && (
-                <div style={{
-                  background: 'rgba(45,212,191,.06)', border: '1px solid rgba(45,212,191,.15)',
-                  borderRadius: 'var(--r-sm)', padding: '8px 10px', marginBottom: 10,
-                }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--teal)', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 5 }}>
-                    베트남 팬 반응 반영
-                  </div>
-                  {anl.data.fanComments.map((c, i) => (
-                    <div key={i} style={{ fontSize: 10, color: 'var(--tx2)', lineHeight: 1.4, marginBottom: i < anl.data.fanComments.length - 1 ? 4 : 0 }}>
-                      "{c.text.slice(0, 70)}{c.text.length > 70 ? '…' : ''}"
-                      {c.likes > 0 && <span style={{ color: 'var(--amber)', marginLeft: 5, fontSize: 9 }}>♥{c.likes}</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {/* 주제 추천 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                 <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--tx3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>AI 주제 추천</span>
@@ -280,9 +262,6 @@ function FeedRow({ item, isOpen, onToggle, anl, badge, onAnalyze, onScript, onSh
                 {anl.data.topics.map((topic, i) => (
                   <TopicCard key={i} topic={topic} artist={item.artist} onScript={onScript} />
                 ))}
-              </div>
-              <div style={{ fontSize: 9, color: 'var(--tx3)', marginTop: 8 }}>
-                참고: {anl.data.refVideos?.map(v => `"${v.title.slice(0, 18)}..."`).join(' · ')}
               </div>
             </div>
           )}
