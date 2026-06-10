@@ -38,8 +38,15 @@ const KPOP_NEWS_KEYWORDS = [
   'chaeyeon', 'hyuna', 'sunmi', 'chungha', 'heize',
 ]
 
+// 아이돌과 무관한 콘텐츠 제외 키워드
+const EXCLUDE_KEYWORDS = [
+  'dating show', 'dating reality', 'reality dating', 'love show',
+  'bisexual', 'lgbtq', 'cooking show', 'game show',
+]
+
 function isKpopIdolNews(title) {
   const t = title.toLowerCase()
+  if (EXCLUDE_KEYWORDS.some(k => t.includes(k))) return false
   return KPOP_NEWS_KEYWORDS.some(k => t.includes(k))
 }
 
@@ -54,10 +61,10 @@ async function translateTitles(titles) {
 ## Critical rules
 
 ### Artist & group names — NEVER transliterate, use ONLY these official Korean names:
-BTS→방탄소년단, BLACKPINK→블랙핑크, TWICE→트와이스, aespa→에스파, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, ILLIT→아일릿, RIIZE→라이즈, BOYNEXTDOOR→보이넥스트도어, BABYMONSTER→베이비몬스터, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TXT→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZEROBASEONE→제로베이스원, NMIXX→엔믹스, ITZY→있지, RED VELVET→레드벨벳, NCT→엔시티, EXO→엑소, SHINee→샤이니, GOT7→갓세븐, MONSTA X→몬스타엑스, THE BOYZ→더보이즈, ASTRO→아스트로, MAMAMOO→마마무, APINK→에이핑크, (G)I-DLE→(여자)아이들, KARD→카드, DAY6→데이식스, BTOB→비투비, VIXX→빅스, INFINITE→인피니트
+BTS→방탄소년단, BLACKPINK→블랙핑크, TWICE→트와이스, aespa→에스파, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, ILLIT→아일릿, RIIZE→라이즈, BOYNEXTDOOR→보이넥스트도어, BABYMONSTER→베이비몬스터, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TXT→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZEROBASEONE→제로베이스원, NMIXX→엔믹스, ITZY→있지, RED VELVET→레드벨벳, NCT→엔시티, EXO→엑소, SHINee→샤이니, GOT7→갓세븐, MONSTA X→몬스타엑스, THE BOYZ→더보이즈, ASTRO→아스트로, MAMAMOO→마마무, APINK→에이핑크, (G)I-DLE→(여자)아이들, KARD→카드, DAY6→데이식스, BTOB→비투비, VIXX→빅스, INFINITE→인피니트, RESCENE→리센느, fromis_9→프로미스나인, KISS OF LIFE→키스오브라이프, tripleS→트리플에스, ARTMS→아르트마스, TWS→투어스
 
 ### Solo artists — use their stage name as-is if Korean, or well-known Korean name:
-Jimin→지민, Jungkook→정국, V→뷔, Jin→진, Suga→슈가, RM→RM, J-Hope→제이홉, Jennie→제니, Lisa→리사, Jisoo→지수, Rosé→로제, Taeyeon→태연, Baekhyun→백현, Taemin→태민, Kai→카이, Chanyeol→찬열, Sunmi→선미, HyunA→현아, Chungha→청하
+Jimin→지민, Jungkook→정국, V→뷔, Jin→진, Suga→슈가, RM→RM, J-Hope→제이홉, Jennie→제니, Lisa→리사, Jisoo→지수, Rosé→로제, Taeyeon→태연, Baekhyun→백현, Taemin→태민, Kai→카이, Chanyeol→찬열, Sunmi→선미, HyunA→현아, Chungha→청하, Wonei→원이
 
 ### Translation style:
 - Concise and punchy — 20~35 characters preferred
@@ -65,6 +72,7 @@ Jimin→지민, Jungkook→정국, V→뷔, Jin→진, Suga→슈가, RM→RM, J
 - Use active declarative endings (확정, 공개, 발표, 출연, 열연, 컴백 등)
 - BANNED endings: "-하고 있어", "-열어두고 있어", "-되고 있어", "-밝혀" (use -밝혀졌다 instead)
 - Song/album/show titles: keep in original English inside single quotes '...'
+- IMPORTANT: If you don't recognize an artist/group name from the list above, keep it in the original English — NEVER guess or make up a Korean name
 - For drama casting news: "[아티스트], 드라마 '[제목]'서 [역할] 맡아" style
 - For comeback/release: "[아티스트], [앨범/곡명] [날짜] 컴백" or "MV 공개" style
 - Return ONLY valid JSON, no markdown: {"translations":["번역1","번역2",...]}
