@@ -346,8 +346,6 @@ export default function TrendPage() {
   const [news,           setNews]           = useState([])
   const [newsLoading,    setNewsLoading]    = useState(true)
   const [selectedNews,   setSelectedNews]   = useState(null)
-  const [filter,         setFilter]         = useState('전체')
-
   // 분석 결과 변경 시 sessionStorage에 저장
   useEffect(() => {
     if (Object.keys(analysis).length > 0)
@@ -368,21 +366,11 @@ export default function TrendPage() {
     return [...trendItems, ...releaseItems]
   }, [trends, releases])
 
-  const filteredFeed = useMemo(() => {
-    if (filter === '트렌딩') return feed.filter(i => i._type === 'trending')
-    if (filter === '신규')   return feed.filter(i => i._type === 'new')
-    return feed
-  }, [feed, filter])
-
   const maxTrendScore = useMemo(
     () => Math.max(...trends.map(t => t.trendScore || 0), 1),
     [trends]
   )
 
-  const newCount = useMemo(
-    () => releases.filter(r => !trends.some(t => t.videoId === r.videoId)).length,
-    [trends, releases]
-  )
 
 
   /* ── Fetchers ──────────────────────────────────────────── */
@@ -475,42 +463,16 @@ export default function TrendPage() {
         </button>
       </div>
 
-      {/* 필터 칩 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
-        {[
-          { key: '전체',   count: feed.length },
-          { key: '트렌딩', count: trends.length },
-          { key: '신규',   count: newCount },
-        ].map(({ key, count }) => {
-          const active = filter === key
-          return (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              style={{
-                padding: '5px 14px', borderRadius: 20,
-                border: active ? '1.5px solid var(--purple)' : '1px solid var(--b1)',
-                background: active ? 'rgba(167,139,250,.22)' : 'rgba(255,255,255,.03)',
-                color: active ? '#d8b4fe' : 'var(--tx3)',
-                fontSize: 11, fontWeight: active ? 700 : 400, cursor: 'pointer',
-                transition: 'all .15s',
-                boxShadow: active ? '0 0 0 1px rgba(167,139,250,.3)' : 'none',
-              }}
-            >
-              {key}
-              {!isLoading && (
-                <span style={{ marginLeft: 5, fontSize: 10, opacity: .65 }}>{count}</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
       {/* 2-컬럼 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 16, alignItems: 'start' }}>
 
         {/* ── 좌측: 피드 테이블 ─────────────────────────────── */}
         <div>
+          {/* 트렌딩 뮤직비디오 타이틀 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx1)', letterSpacing: '-.2px' }}>트렌딩 뮤직비디오</span>
+            <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(190,242,100,.1)', color: 'var(--lime)', fontWeight: 600 }}>YouTube</span>
+          </div>
           {/* 에러 */}
           {!isLoading && trendsError && (
             <div style={{
@@ -570,11 +532,11 @@ export default function TrendPage() {
                 <span style={{ textAlign: 'right' }}>상태</span>
               </div>
 
-              {filteredFeed.length === 0 ? (
+              {feed.length === 0 ? (
                 <div className="warn">데이터를 불러오지 못했습니다.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {filteredFeed.map(item => (
+                  {feed.map(item => (
                     <FeedRow
                       key={item.videoId}
                       item={item}
