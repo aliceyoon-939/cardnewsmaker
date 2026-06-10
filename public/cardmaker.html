@@ -2081,17 +2081,27 @@ async function captureCardDOM(c){
   clone.style.zIndex='-1';
   clone.style.pointerEvents='none';
 
-  // html2canvas가 CSS custom property 포함된 cssText에서 background를 못 읽는 버그 대응
-  // → computed background를 읽어 clone에 명시적으로 덮어씀
+  // ── CSS custom property 해결 (html2canvas는 var(--x) 미지원) ──
+  // 1) 배경색: computed backgroundColor를 clone에 명시 적용
   const computedBg = window.getComputedStyle(cardEl).backgroundColor;
   if(computedBg && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'transparent'){
     clone.style.background = computedBg;
   }
-  // 텍스트 영역도 부모 bg를 명시적으로 적용
+  // 텍스트 영역(top/bottom 레이아웃)도 부모 bg 명시 적용
   const textWrap = clone.querySelector('#pv-text-wrap:not([data-ov-text])');
   if(textWrap){
-    textWrap.style.background = computedBg && computedBg !== 'rgba(0, 0, 0, 0)' ? computedBg : 'inherit';
+    textWrap.style.background = (computedBg && computedBg !== 'rgba(0, 0, 0, 0)') ? computedBg : 'inherit';
   }
+  // 2) 팔레트 커스텀 프로퍼티 → 인라인 스타일로 치환
+  const c1    = cardEl.style.getPropertyValue('--_c1').trim();
+  const cnum  = cardEl.style.getPropertyValue('--_cnum').trim();
+  const cnumt = cardEl.style.getPropertyValue('--_cnumt').trim();
+  if(c1){
+    clone.querySelectorAll('.ctag-a').forEach(el => { el.style.color = c1; });
+    clone.querySelectorAll('.cdot.a').forEach(el => { el.style.background = c1; });
+  }
+  if(cnum)  clone.querySelectorAll('.cn-s').forEach(el => { el.style.background = cnum; });
+  if(cnumt) clone.querySelectorAll('.cn-s').forEach(el => { el.style.color = cnumt; });
   document.body.appendChild(clone);
 
   // 외부 img src → base64 data URL로 교체 (html2canvas CORS 우회)
