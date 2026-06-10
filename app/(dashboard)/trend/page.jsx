@@ -77,13 +77,8 @@ function TopicCard({ topic, artist, onScript }) {
       <div style={{ fontSize: 11, color: 'var(--tx2)', fontStyle: 'italic', lineHeight: 1.5 }}>"{topic.hook}"</div>
       <div style={{ fontSize: 10, color: 'var(--tx3)', lineHeight: 1.5 }}>{topic.reason}</div>
       {!picking ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {topic.keywords?.map(k => (
-              <span key={k} style={{ fontSize: 10, padding: '1px 6px', borderRadius: 20, background: 'var(--s3)', color: 'var(--purple)' }}>{k}</span>
-            ))}
-          </div>
-          <button className="btn" style={{ fontSize: 10, padding: '5px 11px', flexShrink: 0 }} onClick={() => setPicking(true)}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn" style={{ fontSize: 10, padding: '5px 11px' }} onClick={() => setPicking(true)}>
             → 만들기
           </button>
         </div>
