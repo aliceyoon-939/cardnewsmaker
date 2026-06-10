@@ -2591,7 +2591,6 @@ async function translateCard() {
   setTimeout(function(){
     if (!cards.length) return;
     var c = cards[0];
-    if (p.artist) c.tag   = p.artist;
     if (p.topic)  c.title = p.topic;
     if (p.hook)   c.body  = p.hook + (p.reason ? '\n' + p.reason : '');
     renderAll();
