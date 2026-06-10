@@ -2082,6 +2082,21 @@ async function captureCardDOM(c){
   clone.style.pointerEvents='none';
   document.body.appendChild(clone);
 
+  // 외부 img src → base64 data URL로 교체 (html2canvas CORS 우회)
+  async function toDataUrl(url){
+    try{
+      const r=await fetch('/api/proxy-image?url='+encodeURIComponent(url));
+      if(!r.ok) return null;
+      const blob=await r.blob();
+      return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(blob);});
+    }catch{return null;}
+  }
+  const extImgs=[...clone.querySelectorAll('img')].filter(img=>/^https?:\/\//i.test(img.src));
+  await Promise.all(extImgs.map(async img=>{
+    const b64=await toDataUrl(img.src);
+    if(b64) img.src=b64;
+  }));
+
   try{
     return await window.html2canvas(clone,{
       scale:3,
