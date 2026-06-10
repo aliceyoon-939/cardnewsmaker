@@ -2082,6 +2082,10 @@ async function captureCardDOM(c){
   clone.style.pointerEvents='none';
   // border-radius 제거 → PNG 모서리 잘림 방지 (직각 사각형 출력)
   clone.style.borderRadius='0';
+  // .cr 클래스의 cIn 애니메이션(opacity 0→1) 비활성화
+  // DOM 추가 시 애니메이션 재시작 → 중간 프레임에서 opacity<1 상태로 캡처되어 어두워짐
+  clone.style.animation='none';
+  clone.style.opacity='1';
 
   // ── CSS custom property 해결 (html2canvas는 var(--x) 미지원) ──
   // 1) 배경색: computed backgroundColor를 clone에 명시 적용
