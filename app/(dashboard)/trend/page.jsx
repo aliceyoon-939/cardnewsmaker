@@ -464,14 +464,21 @@ export default function TrendPage() {
       </div>
 
       {/* 2-컬럼 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 16, alignItems: 'start' }}>
 
         {/* ── 좌측: 피드 테이블 ─────────────────────────────── */}
-        <div>
+        <div style={{
+          background: 'var(--s1)',
+          border: '1px solid var(--b1)',
+          borderRadius: 'var(--r)',
+          padding: '12px 12px 10px',
+        }}>
           {/* 트렌딩 뮤직비디오 타이틀 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx1)', letterSpacing: '-.2px' }}>트렌딩 뮤직비디오</span>
-            <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(190,242,100,.1)', color: 'var(--lime)', fontWeight: 600 }}>YouTube</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx1)', letterSpacing: '-.2px' }}>트렌딩 뮤직비디오</span>
+              <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(190,242,100,.1)', color: 'var(--lime)', fontWeight: 600 }}>YouTube</span>
+            </div>
           </div>
           {/* 에러 */}
           {!isLoading && trendsError && (
