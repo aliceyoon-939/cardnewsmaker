@@ -2108,8 +2108,13 @@ async function captureCardDOM(c){
   if(cnumt) clone.querySelectorAll('.cn-s').forEach(el => { el.style.color = cnumt; });
 
   // html2canvas는 페이지 전체를 캡처 후 요소 영역을 잘라냄
-  // → 캡처 중 UI 패널을 숨겨야 합성 방지
+  // → html/body 배경 + UI 패널 모두 투명화해야 합성 방지
   const shellEl = document.querySelector('.shell');
+  const htmlEl  = document.documentElement;
+  const origHtmlBg = htmlEl.style.background;
+  const origBodyBg = document.body.style.background;
+  htmlEl.style.background  = 'transparent';
+  document.body.style.background = 'transparent';
   if(shellEl) shellEl.style.visibility='hidden';
   document.body.appendChild(clone);
 
@@ -2139,7 +2144,9 @@ async function captureCardDOM(c){
       backgroundColor: solidBg || '#000000',
     });
   }finally{
-    // UI 복원 및 클론 제거
+    // html/body 배경 복원 및 UI·클론 제거
+    htmlEl.style.background  = origHtmlBg;
+    document.body.style.background = origBodyBg;
     if(shellEl) shellEl.style.visibility='';
     document.body.removeChild(clone);
   }
