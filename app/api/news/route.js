@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { callSolar } from '@/app/lib/solar'
 export const dynamic = 'force-dynamic'
 
 // ── 인메모리 캐시 (15분) ─────────────────────────────────
@@ -44,29 +43,61 @@ function isKpopIdolNews(title) {
   return KPOP_NEWS_KEYWORDS.some(k => t.includes(k))
 }
 
-// ── 제목 일괄 한국어 번역 (Solar) ────────────────────────
+// ── 제목 일괄 한국어 번역 (Claude Haiku) ─────────────────
 async function translateTitles(titles) {
+  const API_KEY = process.env.ANTHROPIC_API_KEY
+  if (!API_KEY) return titles
+
   const numbered = titles.map((t, i) => `${i + 1}. ${t}`).join('\n')
-  const prompt = `한국 엔터테인먼트 매체의 전문 기자로서 아래 Soompi 영어 헤드라인을 자연스러운 한국어 뉴스 제목으로 번역하세요.
+  const prompt = `You are a professional K-pop news editor at a major Korean entertainment outlet (like Naver Entertainment or Dispatch). Translate these Soompi English headlines into natural Korean headlines.
 
-번역 규칙:
-- 짧고 임팩트 있게 (15~30자 권장)
-- 직역 금지 — 의미를 자연스럽게 전달
-- 아티스트명은 팬들이 쓰는 한국명 사용
-  (aespa→에스파, BABYMONSTER→베이비몬스터, BOYNEXTDOOR→보이넥스트도어, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TXT→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZB1→제로베이스원, ILLIT→아일릿, RIIZE→라이즈, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, NMIXX→엔믹스, ITZY→있지, TWICE→트와이스, BLACKPINK→블랙핑크, BTS→방탄소년단, RED VELVET→레드벨벳, NCT→엔시티, EXO→엑소, SHINee→샤이니, GOT7→갓세븐)
-- 곡·앨범 제목은 원문 영어 유지 (따옴표)
-- "-하고 있어", "-열어두고 있어" 같은 어색한 종결 금지 → 능동 단문 사용
-- JSON만 반환 (마크다운 없이): {"translations":["번역1","번역2",...]}
+## Critical rules
 
-번역 예시:
-❌ "권소현, 새 드라마에서 전 그룹 멤버를 무시하는 아이돌 출신 배우 역할"
-✅ "권소현, 신드라마 'Love In Sync'서 아이돌 출신 배우 열연"
+### Artist & group names — NEVER transliterate, use ONLY these official Korean names:
+BTS→방탄소년단, BLACKPINK→블랙핑크, TWICE→트와이스, aespa→에스파, NewJeans→뉴진스, LE SSERAFIM→르세라핌, IVE→아이브, ILLIT→아일릿, RIIZE→라이즈, BOYNEXTDOOR→보이넥스트도어, BABYMONSTER→베이비몬스터, SEVENTEEN→세븐틴, STRAY KIDS→스트레이 키즈, TXT→투모로우바이투게더, ENHYPEN→엔하이픈, ATEEZ→에이티즈, ZEROBASEONE→제로베이스원, NMIXX→엔믹스, ITZY→있지, RED VELVET→레드벨벳, NCT→엔시티, EXO→엑소, SHINee→샤이니, GOT7→갓세븐, MONSTA X→몬스타엑스, THE BOYZ→더보이즈, ASTRO→아스트로, MAMAMOO→마마무, APINK→에이핑크, (G)I-DLE→(여자)아이들, KARD→카드, DAY6→데이식스, BTOB→비투비, VIXX→빅스, INFINITE→인피니트
 
-번역할 제목:
+### Solo artists — use their stage name as-is if Korean, or well-known Korean name:
+Jimin→지민, Jungkook→정국, V→뷔, Jin→진, Suga→슈가, RM→RM, J-Hope→제이홉, Jennie→제니, Lisa→리사, Jisoo→지수, Rosé→로제, Taeyeon→태연, Baekhyun→백현, Taemin→태민, Kai→카이, Chanyeol→찬열, Sunmi→선미, HyunA→현아, Chungha→청하
+
+### Translation style:
+- Concise and punchy — 20~35 characters preferred
+- NO literal word-for-word translation — convey the MEANING naturally
+- Use active declarative endings (확정, 공개, 발표, 출연, 열연, 컴백 등)
+- BANNED endings: "-하고 있어", "-열어두고 있어", "-되고 있어", "-밝혀" (use -밝혀졌다 instead)
+- Song/album/show titles: keep in original English inside single quotes '...'
+- For drama casting news: "[아티스트], 드라마 '[제목]'서 [역할] 맡아" style
+- For comeback/release: "[아티스트], [앨범/곡명] [날짜] 컴백" or "MV 공개" style
+- Return ONLY valid JSON, no markdown: {"translations":["번역1","번역2",...]}
+
+## Examples
+❌ "권소현, 새 드라마 'Love In Sync'에서 전 그룹 멤버를 무시하는 아이돌 출신 배우 역할"
+✅ "권소현, 'Love In Sync'서 아이돌 출신 배우 열연"
+
+❌ "참가자들 사랑의 모든 가능성 열어두고 있어"
+✅ "'StandBIMe' 바이섹슈얼 데이팅쇼 티저 공개"
+
+❌ "BOYNEXTDOOR, 새로운 미니 앨범 발매 계획 발표"
+✅ "보이넥스트도어, 새 미니앨범 발매 예고"
+
+Headlines:
 ${numbered}`
 
   try {
-    const raw = await callSolar(prompt, 1024)
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+    const data = await res.json()
+    const raw = data.content?.[0]?.text || ''
     const start = raw.indexOf('{')
     const end   = raw.lastIndexOf('}')
     const jsonStr = start !== -1 && end !== -1 ? raw.slice(start, end + 1) : raw
