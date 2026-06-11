@@ -20,20 +20,10 @@ export default function Sidebar() {
   const { guardNavigation } = useSave()
   const [isLight, setIsLight] = useState(false)
 
-  // 초기 테마 로드
-  useEffect(() => {
-    const saved = localStorage.getItem('theme')
-    if (saved === 'light') {
-      setIsLight(true)
-      document.documentElement.classList.add('light')
-    }
-  }, [])
-
   function toggleTheme() {
     const next = !isLight
     setIsLight(next)
     document.documentElement.classList.toggle('light', next)
-    localStorage.setItem('theme', next ? 'light' : 'dark')
     // 카드메이커 iframe에 테마 동기화
     window.dispatchEvent(new CustomEvent('themeChange', { detail: { light: next } }))
   }
