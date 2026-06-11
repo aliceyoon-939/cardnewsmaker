@@ -1070,27 +1070,6 @@ ${gThumbnails.length>0?`
   <div style="display:flex;gap:5px;flex-wrap:wrap" id="palPick">
     ${PAL.map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
   </div>
-  <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:8px">
-    <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em">색상 직접 지정 <span style="font-size:8px;font-weight:500;color:var(--tt);text-transform:none;letter-spacing:0">· 전체 슬라이드 적용</span></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
-      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
-        <input type="color" id="eBgColor" value="${gBgColor||'#11040C'}"
-          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
-        <span id="eBgColorLbl" style="font-size:10px;color:var(--ts)">${gBgColor||'팔레트 기본값'}</span>
-      </label>
-      <button id="eBgReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">텍스트</span>
-      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
-        <input type="color" id="eTxColor" value="${gTextColor||'#ffffff'}"
-          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
-        <span id="eTxColorLbl" style="font-size:10px;color:var(--ts)">${gTextColor||'기본값'}</span>
-      </label>
-      <button id="eTxReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
-    </div>
-  </div>
 </div>
 
 <div class="fg">
@@ -1111,23 +1090,47 @@ ${gThumbnails.length>0?`
   </div>
 </div>
 
-<div class="fg">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-    <label class="fl" style="margin-bottom:0">폰트</label>
-    <button id="fontApplyAll" style="font-size:9px;font-weight:700;color:var(--pink);background:rgba(190,242,100,0.1);border:1px solid rgba(190,242,100,0.25);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font);letter-spacing:.02em;white-space:nowrap">전체 슬라이드 적용</button>
-  </div>
-  <div id="fontPick" style="display:flex;flex-direction:column;gap:4px">
-    ${(_fontExp?FONTS:FONTS.slice(0,3)).map(f=>`<button class="font-list-item ${c.font===f.id?'on':''}" data-f="${f.id}">
-      <span class="font-list-name">${f.l}${f.vi?`<span style="display:inline-flex;align-items:center;padding:1px 4px;border-radius:3px;background:rgba(0,180,120,0.18);color:rgba(80,220,160,0.95);font-size:7px;font-weight:700;font-family:var(--font);margin-left:3px">VI</span>`:''}</span>
-      <span class="font-list-preview" style="font-family:${f.stack}">${f.prev}</span>
-    </button>`).join('')}
-  </div>
-  ${_moreBtn('font',_fontExp)}
-</div>
-
 <!-- ── ⚙️ 고급 설정 ── -->
 <button onclick="toggleExp('adv')" style="font-size:10px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:5px;padding:6px 0;cursor:pointer;font-family:var(--font);width:100%;transition:color .13s;letter-spacing:.02em" onmouseover="this.style.color='var(--tp)'" onmouseout="this.style.color='var(--ts)'">${_advDesignExp?'⚙️ 고급 설정 접기 ▲':'⚙️ 고급 설정 ▾'}</button>
 <div style="display:${_advDesignExp?'flex':'none'};flex-direction:column;gap:14px;margin-top:8px">
+
+  <div class="fg" style="margin:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <label class="fl" style="margin-bottom:0">폰트</label>
+      <button id="fontApplyAll" style="font-size:9px;font-weight:700;color:var(--pink);background:rgba(190,242,100,0.1);border:1px solid rgba(190,242,100,0.25);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:var(--font);letter-spacing:.02em;white-space:nowrap">전체 슬라이드 적용</button>
+    </div>
+    <div id="fontPick" style="display:flex;flex-direction:column;gap:4px">
+      ${(_fontExp?FONTS:FONTS.slice(0,3)).map(f=>`<button class="font-list-item ${c.font===f.id?'on':''}" data-f="${f.id}">
+        <span class="font-list-name">${f.l}${f.vi?`<span style="display:inline-flex;align-items:center;padding:1px 4px;border-radius:3px;background:rgba(0,180,120,0.18);color:rgba(80,220,160,0.95);font-size:7px;font-weight:700;font-family:var(--font);margin-left:3px">VI</span>`:''}</span>
+        <span class="font-list-preview" style="font-family:${f.stack}">${f.prev}</span>
+      </button>`).join('')}
+    </div>
+    ${_moreBtn('font',_fontExp)}
+  </div>
+
+  <div class="fg" style="margin:0">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item)">
+      <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em">색상 직접 지정 <span style="font-size:8px;font-weight:500;color:var(--tt);text-transform:none;letter-spacing:0">· 전체 슬라이드 적용</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
+          <input type="color" id="eBgColor" value="${gBgColor||'#11040C'}"
+            style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
+          <span id="eBgColorLbl" style="font-size:10px;color:var(--ts)">${gBgColor||'팔레트 기본값'}</span>
+        </label>
+        <button id="eBgReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">텍스트</span>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
+          <input type="color" id="eTxColor" value="${gTextColor||'#ffffff'}"
+            style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
+          <span id="eTxColorLbl" style="font-size:10px;color:var(--ts)">${gTextColor||'기본값'}</span>
+        </label>
+        <button id="eTxReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
+      </div>
+    </div>
+  </div>
 
   ${!isOv?`<div class="fg" style="margin:0">
     <div class="fl" style="margin-bottom:6px;font-size:11px;font-weight:600">이미지 비율 <span style="font-weight:400;font-size:9px;color:var(--tt)">${isSplit?'(분할 폭 기준)':'— 규격 변경 시 자동 설정'}</span></div>
