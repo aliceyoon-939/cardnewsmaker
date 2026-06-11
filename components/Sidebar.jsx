@@ -34,6 +34,8 @@ export default function Sidebar() {
     setIsLight(next)
     document.documentElement.classList.toggle('light', next)
     localStorage.setItem('theme', next ? 'light' : 'dark')
+    // 카드메이커 iframe에 테마 동기화
+    window.dispatchEvent(new CustomEvent('themeChange', { detail: { light: next } }))
   }
 
   function navigate(path) {

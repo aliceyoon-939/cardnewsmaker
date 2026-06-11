@@ -276,11 +276,13 @@ function CardInner() {
   // iframe 메시지 수신: cardmakerReady + openChannelPicker
   useEffect(() => {
     function onMsg(e) {
-      // 준비 완료 → 마지막 슬라이드 메시지 재전송
+      // 준비 완료 → 마지막 슬라이드 메시지 재전송 + 현재 테마 동기화
       if (e.data?.type === 'cardmakerReady') {
         if (lastMsgRef.current) {
           iframeRef.current?.contentWindow?.postMessage(lastMsgRef.current, '*')
         }
+        const isLight = document.documentElement.classList.contains('light')
+        iframeRef.current?.contentWindow?.postMessage({ type: 'setTheme', light: isLight }, '*')
       }
       // 편집 패널에서 "공식 채널에서 선택" 버튼 클릭
       if (e.data?.type === 'openChannelPicker') {
@@ -289,6 +291,15 @@ function CardInner() {
     }
     window.addEventListener('message', onMsg)
     return () => window.removeEventListener('message', onMsg)
+  }, [])
+
+  // 사이드바 테마 토글 → iframe에 즉시 동기화
+  useEffect(() => {
+    function onThemeChange(e) {
+      iframeRef.current?.contentWindow?.postMessage({ type: 'setTheme', light: e.detail.light }, '*')
+    }
+    window.addEventListener('themeChange', onThemeChange)
+    return () => window.removeEventListener('themeChange', onThemeChange)
   }, [])
 
   function sendSlides(slides, thumbnails) {
