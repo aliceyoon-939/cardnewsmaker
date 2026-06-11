@@ -1066,6 +1066,34 @@ ${gThumbnails.length>0?`
 <div class="sec-hd" style="font-size:12px;text-transform:none;letter-spacing:-.01em;color:var(--tp)">🎨 디자인</div>
 
 <div class="fg">
+  <label class="fl">색상 테마</label>
+  <div style="display:flex;gap:5px;flex-wrap:wrap" id="palPick">
+    ${PAL.map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:8px">
+    <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em">색상 직접 지정 <span style="font-size:8px;font-weight:500;color:var(--tt);text-transform:none;letter-spacing:0">· 전체 슬라이드 적용</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
+        <input type="color" id="eBgColor" value="${gBgColor||'#11040C'}"
+          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
+        <span id="eBgColorLbl" style="font-size:10px;color:var(--ts)">${gBgColor||'팔레트 기본값'}</span>
+      </label>
+      <button id="eBgReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">텍스트</span>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
+        <input type="color" id="eTxColor" value="${gTextColor||'#ffffff'}"
+          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
+        <span id="eTxColorLbl" style="font-size:10px;color:var(--ts)">${gTextColor||'기본값'}</span>
+      </label>
+      <button id="eTxReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
+    </div>
+  </div>
+</div>
+
+<div class="fg">
   <label class="fl">출력 비율</label>
   <div class="fmt-row" id="rpRow">
     ${[['portrait','카드뉴스','3:4'],['square','정방형','1:1'],['facebook','페이스북','4:5'],['tiktok','틱톡','9:16']].map(([id,name,dim])=>`
@@ -1095,34 +1123,6 @@ ${gThumbnails.length>0?`
     </button>`).join('')}
   </div>
   ${_moreBtn('font',_fontExp)}
-</div>
-
-<div class="fg">
-  <label class="fl">색상 테마</label>
-  <div style="display:flex;gap:5px;flex-wrap:wrap" id="palPick">
-    ${PAL.map(p=>`<button class="pick-btn ${c.palette===p.id?'on':''}" data-p="${p.id}" style="${c.palette===p.id?`border-color:${p.c1};color:${p.c1};background:${p.c1}14`:''}">${p.l}</button>`).join('')}
-  </div>
-  <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--stroke);background:var(--bg-card-item);margin-top:8px">
-    <div style="font-size:9px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.07em">색상 직접 지정 <span style="font-size:8px;font-weight:500;color:var(--tt);text-transform:none;letter-spacing:0">· 전체 슬라이드 적용</span></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">배경색</span>
-      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
-        <input type="color" id="eBgColor" value="${gBgColor||'#11040C'}"
-          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
-        <span id="eBgColorLbl" style="font-size:10px;color:var(--ts)">${gBgColor||'팔레트 기본값'}</span>
-      </label>
-      <button id="eBgReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:10px;color:var(--ts);width:42px;flex-shrink:0">텍스트</span>
-      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;position:relative">
-        <input type="color" id="eTxColor" value="${gTextColor||'#ffffff'}"
-          style="width:26px;height:20px;border:1px solid var(--stroke);border-radius:4px;background:none;cursor:pointer;padding:1px 2px;flex-shrink:0"/>
-        <span id="eTxColorLbl" style="font-size:10px;color:var(--ts)">${gTextColor||'기본값'}</span>
-      </label>
-      <button id="eTxReset" style="font-size:9px;color:var(--ts);background:none;border:1px solid var(--stroke);border-radius:4px;cursor:pointer;padding:2px 7px;white-space:nowrap">↺ 초기화</button>
-    </div>
-  </div>
 </div>
 
 <!-- ── ⚙️ 고급 설정 ── -->
