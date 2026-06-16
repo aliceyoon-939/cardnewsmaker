@@ -370,6 +370,7 @@ export async function POST(req) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
       max_tokens: maxTok,
+      temperature: 0,
       // system 파라미터로 분리 → cache_control 으로 캐시 고정
       system: [{ type: 'text', text: systemText, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userContent }],
