@@ -273,6 +273,63 @@ function CardInner() {
   }
 
 
+  // 뉴스 패널에서 유입 시 crawlUrl 파라미터로 자동 크롤링 + 생성
+  useEffect(() => {
+    const urlParam = params.get('crawlUrl')
+    if (!urlParam) return
+    async function autoFromNews() {
+      setCrawlOpen(false)
+      setCrawlUrl(urlParam)
+      setCrawlLoading(true)
+      setCrawlError('')
+      setStatus('fetching')
+      try {
+        const res  = await fetch('/api/crawl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: urlParam }),
+        })
+        const data = await res.json()
+        if (data.error) throw new Error(data.error)
+        setCrawlData(data)
+        setCrawlLoading(false)
+        // 크롤링 완료 즉시 생성 시작
+        setStatus('generating')
+        const genRes = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            format: 'card',
+            artist: data.site,
+            topic:  data.title,
+            type:   '카드뉴스',
+            hook:   '',
+            reason: '기사 크롤링 기반 카드뉴스',
+            keywords: '',
+            articleText: data.text,
+            articleSite: data.site,
+            articleUrl:  data.url,
+          }),
+        })
+        const genData = await genRes.json()
+        if (genData.error) throw new Error(genData.error)
+        const slides = mapSlides(genData.result.slides || [])
+        setKoSlides(genData.result.slides || [])
+        const imgArr = data.images?.length ? data.images : (data.image ? [data.image] : [])
+        sendSlides(slides, imgArr)
+        setSource(data.imageCredit ? `Ảnh - ${data.imageCredit}` : '')
+        setStatus('done')
+        registerPending({ type: 'card', artist: data.site, topic: data.title, result: genData.result, params: { artist: data.site, topic: data.title } })
+      } catch (e) {
+        setCrawlError(e.message)
+        setCrawlLoading(false)
+        setStatus('error')
+        setError(e.message)
+      }
+    }
+    autoFromNews()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // iframe 메시지 수신: cardmakerReady + openChannelPicker
   useEffect(() => {
     function onMsg(e) {
