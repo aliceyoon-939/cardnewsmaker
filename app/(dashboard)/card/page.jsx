@@ -395,7 +395,8 @@ function CardInner() {
   }
 
   useEffect(() => {
-    if (hasContext) fetchAndGenerate()
+    // crawlUrl이 있으면 autoFromNews가 처리하므로 여기서 실행 안 함
+    if (hasContext && !params.get('crawlUrl')) fetchAndGenerate()
   }, [])
 
   async function refreshSlideKo(i) {
