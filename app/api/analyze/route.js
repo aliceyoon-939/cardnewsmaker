@@ -183,7 +183,7 @@ ${commentBlock}
 4. 베트남 팬을 사로잡을 베트남어 후킹 문장도 작성해
 
 JSON만 반환 (코드블록 없이):
-{"topics":[{"title":"한국어 주제명","type":"비하인드|차트|컴백|반응|리뷰|비교","hook":"베트남어 후킹 문장","reason":"왜 지금 이 주제인지 한 문장","keywords":["#태그1","#태그2","#태그3"]}]}`
+{"topics":[{"title":"한국어 주제명","type":"비하인드|차트|컴백|반응|리뷰|비교","hook":"베트남어 후킹 문장","reason":"왜 지금 이 주제인지 한 문장"}]}`
 
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
